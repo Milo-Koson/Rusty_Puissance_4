@@ -1,4 +1,4 @@
-mod stateManager;
+mod state_manager;
 mod chronometre;
 mod displayer;
 mod grid;
