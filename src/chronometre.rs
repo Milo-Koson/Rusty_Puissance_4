@@ -2,7 +2,7 @@ extern crate timer;
 extern crate chrono;
 use std::sync::mpsc::channel;
 
-pub fn startTimer() {
+pub fn start_timer() {
 
     let timer = timer::Timer::new();
     let (tx, rx) = channel();
@@ -11,6 +11,7 @@ pub fn startTimer() {
         println!("In timer !");
         let _ignored = tx.send(());
     });
+    
     rx.recv().unwrap();
 
 }
