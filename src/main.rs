@@ -2,40 +2,31 @@ mod state_manager;
 mod chronometre;
 mod displayer;
 mod grid;
+mod players;
+mod game_data;
 
 use std::thread;
 use std::time::Duration;
+
+use crate::game_data::GameData;
 
 fn main() {
     /* Launch thread objects */
     // Creation of StateManager
 
-    let grid = grid::create_grid(7,6);
-    grid::display_grid(&grid);
+    let player1_name = players::get_player_name(1);
+    println!();
+    let player2_name = players::get_player_name(2);
+    println!();
 
-	let thread_state_manager = thread::spawn(|| {
-        //state_manager::start_state_manager();
-        // Wait for 5 sec
-        thread::sleep(Duration::from_millis(5000));
-    	});
-        
-    // Creation of Chronometre
-	let thread_chronometre = thread::spawn(|| {
-        chronometre::start_timer();
-    	});
-        
-    // Creation of Displayer
-	let thread_displayer = thread::spawn(|| {
-        displayer::start_displayer();
-    	});
+    // Créez les joueurs avec les noms saisis
+    let player1 = players::Player::new(&player1_name, players::IdPlayer::Player1, "O");
+    let player2 = players::Player::new(&player2_name, players::IdPlayer::Player2, "X");
 
-    println!("Hello, world!");
+    let mut game = game_data::GameData::new(player1_name, player2_name);
 
-    // Wait all thread end
-    let wait_state_manager = thread_state_manager.join();
-    let wait_displayer = thread_displayer.join();
-    let wait_chronometre = thread_chronometre.join();
-
+    GameData::display(&game);
+    
     println!("Finish main program")
 }
 
