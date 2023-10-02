@@ -1,4 +1,6 @@
 
+//pub use self::PowerEvent;
+
 /**
  * Destinators events. 
  */
@@ -7,9 +9,9 @@ pub fn here() {
     println!("Power event !");
 }
 
-pub struct PowerEvent {
-    event_type: EventType,
-    position: KEY,
+pub(crate) struct PowerEvent {
+    pub(crate) event_type: EventType,
+    pub(crate) position: KEY,
 }
 
 pub enum KEY {
@@ -23,10 +25,10 @@ pub enum KEY {
 }
 
 pub union EventType {
-    to_state_manager: STATE_MANAGER_EVENT,
-    to_displayer: DISPLAYER_EVENT,
-    to_grid_manager: GRID_MANAGER,
-    to_action_taker: ACTION_TAKER_EVENT
+    to_state_manager: std::mem::ManuallyDrop<STATE_MANAGER_EVENT>,
+    to_displayer: std::mem::ManuallyDrop<DISPLAYER_EVENT>,
+    to_grid_manager: std::mem::ManuallyDrop<GRID_MANAGER_EVENT>,
+    to_action_taker: std::mem::ManuallyDrop<ACTION_TAKER_EVENT>
 }
 
 pub enum STATE_MANAGER_EVENT {
