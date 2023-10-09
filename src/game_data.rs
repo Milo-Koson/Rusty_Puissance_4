@@ -11,8 +11,8 @@ pub struct GameData {
 impl GameData {
     pub fn new(player1_name: String, player2_name: String) -> GameData {
         let grid = grid::create_grid(6, 7);
-        let player1 = Player::new(&player1_name, IdPlayer::Player1, "O");
-        let player2 = Player::new(&player2_name, IdPlayer::Player2, "X");
+        let player1 = Player::new(&player1_name, IdPlayer::Player1, "X");
+        let player2 = Player::new(&player2_name, IdPlayer::Player2, "O");
         
         GameData {
             grid,

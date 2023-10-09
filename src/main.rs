@@ -1,3 +1,5 @@
+use clearscreen;
+
 mod chronometre;
 mod players;
 mod game_data;
@@ -12,17 +14,17 @@ fn main() {
     println!();
 
     // Créez les joueurs avec les noms saisis
-    let player1 = players::Player::new(&player1_name, players::IdPlayer::Player1, "O");
-    let player2 = players::Player::new(&player2_name, players::IdPlayer::Player2, "X");
+    let player1 = players::Player::new(&player1_name, players::IdPlayer::Player1, "X");
+    let player2 = players::Player::new(&player2_name, players::IdPlayer::Player2, "O");
 
-    let mut game = game_data::GameData::new(player1_name, player2_name);
+    let mut current_game = game_data::GameData::new(player1_name, player2_name);
 
-    while !game.game_over {
+    while !current_game.game_over {
         // Obtenez le joueur actuel
-        let current_player = &game.players[game.current_player];
+        let current_player = &current_game.players[current_game.current_player];
     
         // Affichez la grille actuelle (avant que le jeu ne commence)
-        game.display();
+        current_game.display();
     
         println!("C'est à {} de jouer ({}).", current_player.name, current_player.symbol);
     
@@ -32,7 +34,7 @@ fn main() {
             let column = players::get_column_choice();
     
             // Essayez de faire le coup
-            match game.make_move(column) {
+            match current_game.make_move(column) {
                 Ok(_) => {
                     valid_move = true;
                 }
@@ -40,11 +42,10 @@ fn main() {
                     println!("Erreur : {}", err);
                 }
             }
-    
-            // Affichez la grille après le coup (après que le jeu ait éventuellement avancé)
-            game.display();
+            
+            // Effacement de la grille de jeu pour actualiser le terminal
+            clearscreen::clear().expect("Échec de l'effacement de l'écran !");
         }
-    
         // Vérifiez s'il y a une victoire ou un match nul ici
     }
 
