@@ -1,5 +1,8 @@
 mod grid;
+
 use crate::players::{Player, IdPlayer}; 
+
+
 
 pub struct GameData {
     pub grid: Vec<Vec<char>>,
@@ -22,6 +25,10 @@ impl GameData {
         }
     }
 
+    pub fn get_name(&self) -> &str {
+        &self.players[self.current_player].name
+    }
+
     pub fn display(&self) {
         grid::display_grid(&self.grid);
     }
@@ -32,13 +39,16 @@ impl GameData {
             return Err("La colonne n'est pas valide, veuillez en choisir une autre");
         }
 
-        let mut row = None;
-        for r in (0..self.grid.len()).rev() {
-            if self.grid[r][column] == ' ' {
-                row = Some(r);
-                break;
-            }
-        }
+        // Ancienne version de la boucle
+        // let mut row = None;
+        // for r in (0..self.grid.len()).rev() {
+        //     if self.grid[r][column] == ' ' {
+        //         row = Some(r);
+        //         break;
+        //     }
+        // }
+
+        let row = self.grid.iter().find(|r| r[column] == ' ');
 
         if row.is_none() {
             return Err("La colonne est pleine, veuillez en choisir une autre");
@@ -46,14 +56,91 @@ impl GameData {
 
         // Placez le jeton du joueur actuel dans la grille
         let current_player = &self.players[self.current_player];
-        self.grid[row.unwrap()][column] = current_player.symbol.chars().next().unwrap();
+        self.grid[row][column] = current_player.symbol.chars().next().unwrap();
 
-        // Vérifiez s'il y a une victoire ou un match nul (implémentez cette logique ici)
-
-        // Passez au joueur suivant
+        // Actualise le joueur courant
         self.current_player = 1 - self.current_player;
 
         Ok(())
+    }
+
+    pub fn is_game_over(&self) -> bool {
+
+        // Vérification des lignes horizontales
+        for row in &self.grid {
+            for (i, cell) in row.iter().enumerate() {
+                if *cell != ' ' {
+                    let symbol = *cell;
+                    let mut count = 1;
+                    for j in 1..4 {
+                        if i + j < row.len() && row[i + j] == symbol {
+                            count += 1;
+                        } else {
+                            break;
+                        }
+                    }
+                    if count == 4 {
+                        return true; // Il y a un gagnant
+                    }
+                }
+            }
+        }
+
+        // Vérification des colonnes verticales
+        for col in 0..self.grid[0].len() {
+            for i in 0..self.grid.len() - 3 {
+                let mut count = 0;
+                for j in 0..4 {
+                    if self.grid[i + j][col] == self.players[0].symbol.chars().next().unwrap() {
+                        count += 1;
+                    } else if self.grid[i + j][col] == self.players[1].symbol.chars().next().unwrap() {
+                        count -= 1;
+                    }
+                }
+                if count == 4 || count == -4 {
+                    return true; // Il y a un gagnant
+                }
+            }
+        }
+
+        // Vérification des diagonales
+        for row in 0..self.grid.len() - 3 {
+            for col in 0..self.grid[0].len() - 3 {
+                let mut count_diag1 = 0;
+                let mut count_diag2 = 0;
+                for i in 0..4 {
+                    if self.grid[row + i][col + i] == self.players[0].symbol.chars().next().unwrap() {
+                        count_diag1 += 1;
+                    } else if self.grid[row + i][col + i] == self.players[1].symbol.chars().next().unwrap() {
+                        count_diag1 -= 1;
+                    }
+                    if self.grid[row + i][col + 3 - i] == self.players[0].symbol.chars().next().unwrap() {
+                        count_diag2 += 1;
+                    } else if self.grid[row + i][col + 3 - i] == self.players[1].symbol.chars().next().unwrap() {
+                        count_diag2 -= 1;
+                    }
+                }
+                if count_diag1 == 4 || count_diag1 == -4 || count_diag2 == 4 || count_diag2 == -4 {
+                    return true; // Il y a un gagnant
+                }
+            }
+        }
+
+        false
+    }
+
+    pub fn is_game_draw(&self) -> bool {
+
+        for row in &self.grid {
+            for cell in row {
+                if *cell == ' ' {
+                    // Il y a une case vide, le jeu n'est pas terminé
+                    return false;
+                }
+            }
+        }
+        
+        true
     }
 
 }

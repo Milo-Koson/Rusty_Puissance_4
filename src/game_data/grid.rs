@@ -1,5 +1,3 @@
-use crossterm::{execute, ExecutableCommand};
-
 pub fn create_grid(rows: usize, cols: usize) -> Vec<Vec<char>> {
     let mut grid = Vec::with_capacity(rows);
     for _ in 0..rows {
