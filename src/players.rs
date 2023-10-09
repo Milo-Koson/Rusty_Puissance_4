@@ -32,3 +32,16 @@ pub fn get_player_name(player_number: u8) -> String {
     let trimmed_name = input.trim();
     trimmed_name.to_string()
 }
+
+pub fn get_column_choice() -> usize {
+    println!("Entrez le numéro de la colonne où vous souhaitez placer votre pièce : ");
+
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("La saisie contient une erreur, veuillez recommencer");
+
+    let column: usize = input.trim().parse().expect("La colonne n'est pas valide, veuillez en choisir une autre");
+
+    column - 1
+}

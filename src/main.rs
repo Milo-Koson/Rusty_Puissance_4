@@ -1,14 +1,6 @@
-mod state_manager;
 mod chronometre;
-mod displayer;
-mod grid;
 mod players;
 mod game_data;
-
-use std::thread;
-use std::time::Duration;
-
-use crate::game_data::GameData;
 
 fn main() {
     /* Launch thread objects */
@@ -25,8 +17,37 @@ fn main() {
 
     let mut game = game_data::GameData::new(player1_name, player2_name);
 
-    GameData::display(&game);
+    while !game.game_over {
+        // Obtenez le joueur actuel
+        let current_player = &game.players[game.current_player];
     
+        // Affichez la grille actuelle (avant que le jeu ne commence)
+        game.display();
+    
+        println!("C'est à {} de jouer ({}).", current_player.name, current_player.symbol);
+    
+        let mut valid_move = false;
+        while !valid_move {
+            // Demandez au joueur de choisir une colonne
+            let column = players::get_column_choice();
+    
+            // Essayez de faire le coup
+            match game.make_move(column) {
+                Ok(_) => {
+                    valid_move = true;
+                }
+                Err(err) => {
+                    println!("Erreur : {}", err);
+                }
+            }
+    
+            // Affichez la grille après le coup (après que le jeu ait éventuellement avancé)
+            game.display();
+        }
+    
+        // Vérifiez s'il y a une victoire ou un match nul ici
+    }
+
     println!("Finish main program")
 }
 
