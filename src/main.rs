@@ -8,7 +8,6 @@ use std::time::Duration;
 mod timer;
 mod players;
 mod game_data;
-mod state_manager;
 
 const WINDOW_SIZE: i32 = 500;
 const WINDOW_MIDDLE: f32 = 0.;
@@ -62,7 +61,6 @@ async fn main() {
                 current_game.current_player = 1 - current_game.current_player;
             }
         }
-
 
     // Affiche le gagnant
     current_game.display();
