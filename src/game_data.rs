@@ -1,8 +1,7 @@
 mod grid;
 
-use crate::players::{Player, IdPlayer}; 
-
-
+use crate::players::{Player, IdPlayer, self}; 
+use crate::players::get_column_choice;
 
 pub struct GameData {
     pub grid: Vec<Vec<char>>,
@@ -40,15 +39,15 @@ impl GameData {
         }
 
         // Ancienne version de la boucle
-        // let mut row = None;
-        // for r in (0..self.grid.len()).rev() {
-        //     if self.grid[r][column] == ' ' {
-        //         row = Some(r);
-        //         break;
-        //     }
-        // }
+        let mut row = None;
+        for r in (0..self.grid.len()).rev() {
+            if self.grid[r][column] == ' ' {
+                row = Some(r);
+                break;
+            }
+        }
 
-        let row = self.grid.iter().find(|r| r[column] == ' ');
+        // let row = self.grid.iter().find(|r| r[column] == ' ');
 
         if row.is_none() {
             return Err("La colonne est pleine, veuillez en choisir une autre");
@@ -56,12 +55,42 @@ impl GameData {
 
         // Placez le jeton du joueur actuel dans la grille
         let current_player = &self.players[self.current_player];
-        self.grid[row][column] = current_player.symbol.chars().next().unwrap();
+        self.grid[row.unwrap()][column] = current_player.symbol.chars().next().unwrap();
 
         // Actualise le joueur courant
         self.current_player = 1 - self.current_player;
 
         Ok(())
+    }
+
+    pub fn play_game(&mut self) {
+
+        // Détermine le joueur courant
+        let current_player = &self.players[self.current_player];
+        
+        // Affiche la grille vide
+        self.display();
+    
+        println!("C'est à {} de jouer ({}).", current_player.name, current_player.symbol);
+    
+        let mut valid_move = false;
+        while !valid_move {
+            // Demande au joueur courant de choisir la colonne
+            let column = players::get_column_choice();
+    
+            // Essayez de placer une pièce sur la grille
+            match self.make_move(column) {
+                Ok(_) => {
+                    valid_move = true;
+                }
+                Err(err) => {
+                    println!("Erreur : {}", err);
+                }
+            }
+            
+            // Effacement de la grille de jeu pour actualiser le terminal
+            clearscreen::clear().expect("Échec de l'effacement de l'écran !");
+        }
     }
 
     pub fn is_game_over(&self) -> bool {
@@ -144,4 +173,3 @@ impl GameData {
     }
 
 }
-

@@ -33,6 +33,15 @@ pub fn get_player_name(player_number: u8) -> String {
     trimmed_name.to_string()
 }
 
+pub fn set_player_names() -> (String, String) {
+    let player1_name = get_player_name(1);
+    println!();
+    let player2_name = get_player_name(2);
+    println!();
+
+    (player1_name, player2_name)
+}
+
 pub fn get_column_choice() -> usize {
     println!("Entrez le numéro de la colonne où vous souhaitez placer votre pièce : ");
 
