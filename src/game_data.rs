@@ -1,7 +1,6 @@
 mod grid;
 
-use crate::players::{Player, IdPlayer, self}; 
-use crate::players::get_column_choice;
+use crate::players::{Player, IdPlayer, self};
 
 pub struct GameData {
     pub grid: Vec<Vec<char>>,
@@ -35,6 +34,7 @@ impl GameData {
     pub fn make_move(&mut self, column: usize) -> Result<(), &str> {
        
         if column >= self.grid[0].len() {
+            self.display();
             return Err("La colonne n'est pas valide, veuillez en choisir une autre");
         }
 
@@ -64,7 +64,7 @@ impl GameData {
     }
 
     pub fn play_game(&mut self) {
-
+        
         // Détermine le joueur courant
         let current_player = &self.players[self.current_player];
         
@@ -94,7 +94,6 @@ impl GameData {
     }
 
     pub fn is_game_over(&self) -> bool {
-
         // Vérification des lignes horizontales
         for row in &self.grid {
             for (i, cell) in row.iter().enumerate() {
@@ -109,7 +108,7 @@ impl GameData {
                         }
                     }
                     if count == 4 {
-                        return true; // Il y a un gagnant
+                        return true;
                     }
                 }
             }
@@ -127,7 +126,7 @@ impl GameData {
                     }
                 }
                 if count == 4 || count == -4 {
-                    return true; // Il y a un gagnant
+                    return true; 
                 }
             }
         }
@@ -150,7 +149,7 @@ impl GameData {
                     }
                 }
                 if count_diag1 == 4 || count_diag1 == -4 || count_diag2 == 4 || count_diag2 == -4 {
-                    return true; // Il y a un gagnant
+                    return true;
                 }
             }
         }
@@ -159,7 +158,6 @@ impl GameData {
     }
 
     pub fn is_game_draw(&self) -> bool {
-
         for row in &self.grid {
             for cell in row {
                 if *cell == ' ' {
