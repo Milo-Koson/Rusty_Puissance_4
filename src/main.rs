@@ -5,7 +5,6 @@ use std::sync::mpsc::channel;
 use std::thread::{self, current};
 use std::time::Duration;
 
-mod timer;
 mod players;
 mod game_data;
 
@@ -40,9 +39,6 @@ async fn main() {
     // Fixe le centre de la camera aux coordonnées 0 x-axis and 0 y-axis. 
     set_camera(&camera);
 
-    let (tx_timer, rx_timer) = channel::<timer::EVENT_TIMER>();
-    let thread_timer = timer::start_timer(rx_timer);
-
     // Demande aux joueurs de saisir leurs noms
     let (player1_name, player2_name) = players::set_player_names();
     
@@ -66,9 +62,6 @@ async fn main() {
     current_game.display();
     println!("Le gagnant est : {} ", current_game.get_name());
     println!("Fin du jeu !");
-
-    tx_timer.send(timer::EVENT_TIMER::End);
-    let _wait_end_timer = thread_timer.join();
     
 }
 
