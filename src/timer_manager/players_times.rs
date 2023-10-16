@@ -68,7 +68,7 @@ impl<'a> PlayersTimes<'a> {
             }
         }
 
-        println!("Tick, current player time : {}", *seconds_current_player);
+        //println!("Tick, current player time : {}", *seconds_current_player);
         false
     }
 

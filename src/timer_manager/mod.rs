@@ -1,7 +1,7 @@
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
 use macroquad::prelude::next_frame;
-use crate::EventTimer;
+use crate::Event;
 use crate::timer_manager::players_times::PlayersTimes;
 use crate::timer_manager::timer_graphics::TimerGraphics;
 use crate::timer_manager::timer_tick::{EventTimerTick, Tick};
@@ -14,11 +14,12 @@ pub struct TimerManager<'a> {
     timer_graphics: TimerGraphics,
     players_times: PlayersTimes<'a>,
     rx_tick: Receiver<Tick>,
-    tx_tick: Sender<EventTimerTick>
+    tx_tick: Sender<EventTimerTick>,
+    tx_game_manager: Sender<Event>
 }
 
 impl<'a> TimerManager<'a> {
-    pub(crate) fn new(name_player_1: &'a str, name_player_2: &'a str) -> TimerManager<'a> {
+    pub(crate) fn new(name_player_1: &'a str, name_player_2: &'a str, tx_game_manager: Sender<Event>) -> TimerManager<'a> {
 
         println!("Timer manager - New");
         // Crée deux canaux de communications pour le timer tick
@@ -34,7 +35,8 @@ impl<'a> TimerManager<'a> {
             timer_graphics: TimerGraphics::new(),
             players_times: PlayersTimes::new(name_player_1, name_player_2),
             rx_tick: rx_for_timer_manager,
-            tx_tick: tx_for_timer_tick
+            tx_tick: tx_for_timer_tick,
+            tx_game_manager
         }
     }
 
@@ -69,7 +71,7 @@ impl<'a> TimerManager<'a> {
         false
     }
 
-    pub fn change_p(&mut self) {
+    pub fn change_player(&mut self) {
         println!("Timer manager change player");
         self.players_times.change_player();
     }

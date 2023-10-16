@@ -5,8 +5,11 @@ use std::sync::mpsc::channel;
 use std::thread::{self, current};
 use std::time::Duration;
 
-mod players;
-mod game_data;
+use crate::game_manager::GameManager;
+use crate::timer_manager::TimerManager;
+
+mod game_manager;
+mod timer_manager;
 
 const WINDOW_SIZE: i32 = 500;
 const WINDOW_MIDDLE: f32 = 0.;
@@ -25,8 +28,14 @@ fn window_conf() -> Conf {
     }
 }
 
-fn init_timer() {
+fn init_timer_manager() {
 
+}
+
+#[derive(Debug)]
+pub enum Event {
+    PlayerChange,
+    End
 }
 
 #[macroquad::main(window_conf)]
@@ -39,29 +48,56 @@ async fn main() {
     // Fixe le centre de la camera aux coordonnées 0 x-axis and 0 y-axis. 
     set_camera(&camera);
 
-    // Demande aux joueurs de saisir leurs noms
-    let (player1_name, player2_name) = players::set_player_names();
+    // Créer les canaux entre game manager et timer manager 
+    let (tx_timer, rx_timer) = channel::<Event>();
+    let (tx_game_manager, rx_game_manager) = channel::<Event>();
     
     // Modifie les noms des joueurs avec les noms saisis
-    let mut current_game = game_data::GameData::new(player1_name, player2_name);
+    let mut game_manager = GameManager::new(tx_timer, rx_game_manager);
 
-        // Vérifie s'il y a un match nul ou une victoire
-        while !current_game.game_over {
-            current_game.play_game();
-            current_game.is_game_draw();
-            current_game.is_game_over();
+    println!("Starting game ...");
+    // Run game manager
+    let (game_started, (name_player_1, name_player_2)) = game_manager.get_game_information();
 
-            // Actualise le joueur l'état de jeu et le joueur courant en cas de victoire
-            if current_game.is_game_over() {
-                current_game.game_over = true;
-                current_game.current_player = 1 - current_game.current_player;
-            }
-        }
-
-    // Affiche le gagnant
-    current_game.display();
-    println!("Le gagnant est : {} ", current_game.get_name());
-    println!("Fin du jeu !");
+    let thread_game_manager = thread::spawn(move || {
+        game_manager.run_game();
+    });
     
+    if game_started {
+        // Si partie lancée, on démarre timer manager
+        let mut timer_manager = TimerManager::new(&name_player_1, &name_player_2, tx_game_manager);
+        timer_manager.start();
+        let mut end_game = false;
+
+        while !end_game {
+
+            end_game = timer_manager.run().await;
+    
+            // Si un endgame a déjà été signalé par temps écoulé, on ve vérifie pas de message dans le
+            // canal du state manager
+            if !end_game {
+                // Vérifie si endgame par victoire, envoyé par state manager
+                let response_from_state_manager = rx_timer.try_recv();
+    
+                match response_from_state_manager {
+                    Ok(Event::PlayerChange) => timer_manager.change_player(),
+                    Ok(Event::End) => {
+                        println!("Réponse de state manager : {:?}", response_from_state_manager);
+                        end_game = true;
+                    },
+                    _ => print!("")
+                }
+            }
+            next_frame().await;
+        }
+        
+        timer_manager.stop();
+        println!("Main - END GAME");
+    } else {
+        println!("Game not started ...");
+    }
+
+    let _ = thread_game_manager.join();
+
 }
 

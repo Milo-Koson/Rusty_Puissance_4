@@ -19,9 +19,10 @@ impl Player {
             symbol: symbol.to_string()
         }
     }
+
 }
 
-pub fn get_player_name(player_number: u8) -> String {
+pub fn input_player_name(player_number: u8) -> String {
     println!("Entrez le nom du joueur {} :\n", player_number);
 
     let mut input = String::new();
@@ -34,9 +35,9 @@ pub fn get_player_name(player_number: u8) -> String {
 }
 
 pub fn set_player_names() -> (String, String) {
-    let player1_name = get_player_name(1);
+    let player1_name = input_player_name(1);
     println!();
-    let player2_name = get_player_name(2);
+    let player2_name = input_player_name(2);
     println!();
 
     (player1_name, player2_name)

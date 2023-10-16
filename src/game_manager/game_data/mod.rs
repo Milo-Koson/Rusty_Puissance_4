@@ -1,6 +1,7 @@
 mod grid;
 
-use crate::players::{Player, IdPlayer, self};
+mod players; //::{Player, IdPlayer, self}; 
+use self::players::*;
 
 pub struct GameData {
     pub grid: Vec<Vec<char>>,
@@ -10,7 +11,10 @@ pub struct GameData {
 }
 
 impl GameData {
-    pub fn new(player1_name: String, player2_name: String) -> GameData {
+    pub fn new() -> GameData {
+        // On demande les noms des joueurs 
+        let (player1_name, player2_name) = players::set_player_names();
+
         let grid = grid::create_grid(6, 7);
         let player1 = Player::new(&player1_name, IdPlayer::Player1, "X");
         let player2 = Player::new(&player2_name, IdPlayer::Player2, "O");
@@ -25,6 +29,10 @@ impl GameData {
 
     pub fn get_name(&self) -> &str {
         &self.players[self.current_player].name
+    }
+
+    pub fn get_player_names(&self) -> (String, String) {
+        (self.players[0].name.to_string(), self.players[1].name.to_string())
     }
 
     pub fn display(&self) {

@@ -29,13 +29,14 @@ pub fn run(rx_timer: Receiver<EventTimerTick>, tx_timer: Sender<Tick>) {
             println!("Timer tick - skipping ticks");
         },
         _ => {}
+        Err(_) => {},
     }
 
     while !end_game {
 
         // Wait for 1 sec
         thread::sleep(Duration::from_millis(1000));
-        println!("tick");
+        //println!("tick");
         let _ = tx_timer.send(Tick::Tick);
 
         // Check if we should pause or quit.
