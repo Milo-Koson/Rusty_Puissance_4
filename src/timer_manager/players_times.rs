@@ -1,7 +1,6 @@
 
-
-const START_TIME_MINUTES: f64 = 0.;
-const START_TIME_SECONDS: f64 = 5.;
+const START_TIME_MINUTES: f64 = 3.;
+const START_TIME_SECONDS: f64 = 0.;
 
 #[derive(PartialEq)]
 pub enum Player {

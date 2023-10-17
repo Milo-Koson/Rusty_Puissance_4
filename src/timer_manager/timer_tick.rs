@@ -1,5 +1,5 @@
 
-use std::sync::mpsc::{Receiver, RecvError, Sender};
+use std::sync::mpsc::{Receiver, Sender}; //RecvError
 
 use std::thread;
 use std::time::Duration;

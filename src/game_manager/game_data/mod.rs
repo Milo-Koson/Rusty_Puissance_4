@@ -1,6 +1,8 @@
 mod grid;
 
-mod players; //::{Player, IdPlayer, self}; 
+mod players;
+
+//::{Player, IdPlayer, self}; 
 use self::players::*;
 
 pub struct GameData {
@@ -55,7 +57,7 @@ impl GameData {
         //     }
         // }
 
-        let row = self.grid.iter_mut().find(|r| r[column] == ' ');
+        let row = self.grid.iter_mut().rev().find(|r| r[column] == ' ');
 
         if let Some(row) = row {
 
@@ -67,7 +69,6 @@ impl GameData {
             self.current_player = 1 - self.current_player;
 
             Ok(())
-            
         }
         else {
             Err("La colonne est pleine, veuillez en choisir une autre")
@@ -104,68 +105,42 @@ impl GameData {
     }
 
     pub fn is_game_over(&self) -> bool {
-        // Vérification des lignes horizontales
+        let symbol_chars: Vec<char> = self.players.iter().map(|player| player.symbol.chars().next().unwrap()).collect();
         for row in &self.grid {
-            for (i, cell) in row.iter().enumerate() {
-                if *cell != ' ' {
-                    let symbol = *cell;
-                    let mut count = 1;
-                    for j in 1..4 {
-                        if i + j < row.len() && row[i + j] == symbol {
-                            count += 1;
-                        } else {
-                            break;
-                        }
-                    }
-                    if count == 4 {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        // Vérification des colonnes verticales
-        for col in 0..self.grid[0].len() {
-            for i in 0..self.grid.len() - 3 {
-                let mut count = 0;
-                for j in 0..4 {
-                    if self.grid[i + j][col] == self.players[0].symbol.chars().next().unwrap() {
-                        count += 1;
-                    } else if self.grid[i + j][col] == self.players[1].symbol.chars().next().unwrap() {
-                        count -= 1;
-                    }
-                }
-                if count == 4 || count == -4 {
-                    return true; 
-                }
-            }
-        }
-
-        // Vérification des diagonales
-        for row in 0..self.grid.len() - 3 {
-            for col in 0..self.grid[0].len() - 3 {
-                let mut count_diag1 = 0;
-                let mut count_diag2 = 0;
-                for i in 0..4 {
-                    if self.grid[row + i][col + i] == self.players[0].symbol.chars().next().unwrap() {
-                        count_diag1 += 1;
-                    } else if self.grid[row + i][col + i] == self.players[1].symbol.chars().next().unwrap() {
-                        count_diag1 -= 1;
-                    }
-                    if self.grid[row + i][col + 3 - i] == self.players[0].symbol.chars().next().unwrap() {
-                        count_diag2 += 1;
-                    } else if self.grid[row + i][col + 3 - i] == self.players[1].symbol.chars().next().unwrap() {
-                        count_diag2 -= 1;
-                    }
-                }
-                if count_diag1 == 4 || count_diag1 == -4 || count_diag2 == 4 || count_diag2 == -4 {
+            if let Some(symbol) = row.iter().find(|&&cell| cell != ' ') {
+                if row.windows(4).any(|window| window.iter().all(|&cell| cell == *symbol)) {
                     return true;
                 }
             }
         }
-
+    
+        for col in 0..self.grid[0].len() {
+            for i in 0..self.grid.len() - 3 {
+                if (0..4).all(|j| {
+                    let cell = self.grid[i + j][col];
+                    symbol_chars.contains(&cell)
+                }) {
+                    return true;
+                }
+            }
+        }
+    
+        for row in 0..self.grid.len() - 3 {
+            for col in 0..self.grid[0].len() - 3 {
+                if (0..4).all(|i| {
+                    (0..4).all(|j| {
+                        let cell1 = self.grid[row + i + j][col + i + j];
+                        let cell2 = self.grid[row + i + j][col + 3 - i - j];
+                        symbol_chars.contains(&cell1) || symbol_chars.contains(&cell2)
+                    })
+                }) {
+                    return true;
+                }
+            }
+        }
+    
         false
-    }
+    }    
 
     pub fn is_game_draw(&self) -> bool {
         for row in &self.grid {
