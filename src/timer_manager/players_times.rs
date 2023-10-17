@@ -45,6 +45,10 @@ impl PlayersTimes {
         self.timer_player_2.name_player = name_player_2;
     }
 
+    /**
+      * Retourne true si fin, faux si pas fin 
+      *
+      */
     pub fn tick_time(&mut self) -> bool {
 
         // Current player is player 1
@@ -96,5 +100,12 @@ impl PlayersTimes {
             return self.timer_player_1.seconds;
         }
         self.timer_player_2.seconds
+    }
+
+    pub fn get_current_player_name(&self) -> &String {
+        match self.current_player {
+            Player::Player1 => &self.timer_player_2.name_player,
+            Player::Player2 => &self.timer_player_1.name_player
+        }
     }
 }

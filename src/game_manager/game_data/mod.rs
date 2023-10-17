@@ -90,14 +90,13 @@ impl GameData {
             match self.make_move(column) {
                 Ok(_) => {
                     valid_move = true;
+                    // Effacement de la grille de jeu pour actualiser le terminal
+                    clearscreen::clear().expect("Échec de l'effacement de l'écran !");
                 }
                 Err(err) => {
                     println!("Erreur : {}", err);
                 }
             }
-            
-            // Effacement de la grille de jeu pour actualiser le terminal
-            clearscreen::clear().expect("Échec de l'effacement de l'écran !");
         }
     }
 
@@ -176,6 +175,10 @@ impl GameData {
         }
         
         true
+    }
+
+    pub fn timeout(&mut self) {
+        self.game_over = true;
     }
 
 }

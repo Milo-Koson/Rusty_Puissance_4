@@ -33,6 +33,20 @@ impl GameManager {
         while !self.game_data.game_over {
             self.game_data.play_game();
 
+            // Check timer rep 
+            // Si timeout, on demande de quitter
+            let response_timer = self.rx_timer.try_recv();
+            match response_timer {
+                Ok(Event::Timeout) => {
+                    // Time out reçu de timer, on demande de quitter 
+                    println!("Merci d'avoir joué, aurevoir !");
+                    self.game_data.timeout();
+                    return;
+                },
+                Ok(_) => {},
+                Err(_) => {},
+            }
+
             if self.game_data.is_game_draw() {
                 println!("Game draw - Endgame");
             }
@@ -54,12 +68,15 @@ impl GameManager {
         self.stop();
     }
 
+    /*
     pub fn get_game_information(&self) -> (bool, (String, String)) {
         if self.game_data.game_over {
             return (false, ("".to_string(), "".to_string()));
         } 
         (true, self.game_data.get_player_names())
     }
+    */
+
 }
 
 impl ConnectFourThreadObject for GameManager {

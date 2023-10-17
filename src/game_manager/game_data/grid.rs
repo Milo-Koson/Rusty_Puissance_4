@@ -8,7 +8,6 @@ pub fn create_grid(rows: usize, cols: usize) -> Vec<Vec<char>> {
 }
 
 pub fn display_grid(grid: &Vec<Vec<char>>) {
-    let rows = grid.len();
     let cols = grid[0].len();
     
     // Ligne supérieure
