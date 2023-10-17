@@ -1,6 +1,5 @@
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
-use macroquad::prelude::next_frame;
 use crate::Event;
 use crate::timer_manager::players_times::PlayersTimes;
 use crate::timer_manager::timer_graphics::TimerGraphics;
@@ -52,13 +51,21 @@ impl TimerManager {
         // Si tick, met à jour le temps du joueur courant
         match response_tick {
             Ok(Tick::Tick) => {
-                self.players_times.tick_time();
+                let response_players_ticks = self.players_times.tick_time();
+                match response_players_ticks {
+                    true => {
+                        println!("Timeout !! Félicitations au vainqueur : {} !! ", self.players_times.get_current_player_name());
+                        println!("Saisissez n'importe quoi pour quitter");
+                        // Envoi du temps écoulé à game manager
+                        let _ = self.tx_game_manager.send(Event::Timeout);
+                        let _ = self.tx_tick.send(EventTimerTick::End);
+                        return true;
+                    },
+                    false => {}
+                }   
             },
-            Ok(Tick::End) => {
-                println!("Timer manager - TIME ! From Tick");
-                return true;
-            },
-            _ => {}
+            Ok(_) => {},
+            Err(_) => {}
         }
 
         // Met à jour la fenêtre graphique

@@ -11,9 +11,7 @@ pub enum EventTimerTick {
 }
 
 pub enum Tick {
-    Tick,
-    Pause,
-    End
+    Tick
 }
 
 pub fn run(rx_timer: Receiver<EventTimerTick>, tx_timer: Sender<Tick>) {
@@ -28,8 +26,8 @@ pub fn run(rx_timer: Receiver<EventTimerTick>, tx_timer: Sender<Tick>) {
             end_game = true;
             println!("Timer tick - skipping ticks");
         },
-        _ => {}
-        Err(_) => {},
+        Ok(_) => {}
+        Err(_) => {println!("[ERREUR À DÉFINIR")},
     }
 
     while !end_game {

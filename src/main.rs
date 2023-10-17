@@ -1,8 +1,8 @@
 use macroquad::prelude::*;
 
-use std::sync::mpsc::{channel, RecvError};
+use std::sync::mpsc::{channel, Sender, Receiver};
 
-use std::thread::{ self };
+use std::thread::{ self, JoinHandle };
 
 use crate::game_manager::GameManager;
 use crate::timer_manager::TimerManager;
@@ -23,13 +23,20 @@ fn window_conf() -> Conf {
     }
 }
 
-fn init_timer_manager() {
+fn init_timer_manager(tx_timer: Sender<Event>, rx_game_manager: Receiver<Event>, tx_player_names: Sender<(String, String)>) -> JoinHandle<()> {
+    thread::spawn(move || {
+        // Crée le game manager
+        let mut game_manager = GameManager::new(tx_timer, rx_game_manager, tx_player_names);
 
+        // Boucle principale de la gestion du jeu
+        game_manager.run_game();
+    })
 }
 
 #[derive(Debug)]
 pub enum Event {
     PlayerChange,
+    Timeout,
     End
 }
 
@@ -52,13 +59,7 @@ async fn main() {
     println!("Starting game ...");
 
     // Création du thread du game manager
-    let thread_game_manager = thread::spawn(move || {
-        // Crée le game manager
-        let mut game_manager = GameManager::new(tx_timer, rx_game_manager, tx_player_names);
-
-        // Boucle principale de la gestion du jeu
-        game_manager.run_game();
-    });
+    let thread_game_manager = init_timer_manager(tx_timer, rx_game_manager, tx_player_names);
 
     // Récupère les informations du game manager avec les noms des joueurs, par réception bloquante du canal.
     // let (game_started, (name_player_1, name_player_2)) = game_manager.get_game_information();
@@ -85,7 +86,6 @@ async fn main() {
                 match response_from_state_manager {
                     Ok(Event::PlayerChange) => timer_manager.change_player(),
                     Ok(Event::End) => {
-                        println!("Réponse de state manager : {:?}", response_from_state_manager);
                         end_game = true;
                     },
                     _ => print!("")
