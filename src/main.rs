@@ -102,7 +102,7 @@ async fn main() {
             next_frame().await;
         }
         
-        timer_manager.stop();
+        timer_manager.destroy();
         println!("Main - END GAME");
     } else {
         println!("Game not started ...");

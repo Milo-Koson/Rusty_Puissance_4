@@ -47,28 +47,31 @@ impl GameData {
         }
 
         // Ancienne version de la boucle
-        let mut row = None;
-        for r in (0..self.grid.len()).rev() {
-            if self.grid[r][column] == ' ' {
-                row = Some(r);
-                break;
-            }
+        // let mut row = None;
+        // for r in (0..self.grid.len()).rev() {
+        //     if self.grid[r][column] == ' ' {
+        //         row = Some(r);
+        //         break;
+        //     }
+        // }
+
+        let row = self.grid.iter_mut().find(|r| r[column] == ' ');
+
+        if let Some(row) = row {
+
+            // Placez le jeton du joueur actuel dans la grille
+            let current_player = &self.players[self.current_player];
+            row[column] = current_player.symbol.chars().next().unwrap();
+        
+            // Actualise le joueur courant
+            self.current_player = 1 - self.current_player;
+
+            Ok(())
+            
         }
-
-        // let row = self.grid.iter().find(|r| r[column] == ' ');
-
-        if row.is_none() {
-            return Err("La colonne est pleine, veuillez en choisir une autre");
+        else {
+            Err("La colonne est pleine, veuillez en choisir une autre")
         }
-
-        // Placez le jeton du joueur actuel dans la grille
-        let current_player = &self.players[self.current_player];
-        self.grid[row.unwrap()][column] = current_player.symbol.chars().next().unwrap();
-
-        // Actualise le joueur courant
-        self.current_player = 1 - self.current_player;
-
-        Ok(())
     }
 
     pub fn play_game(&mut self) {

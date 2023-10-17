@@ -63,7 +63,7 @@ impl GameManager {
             }
         }
 
-        self.stop();
+        self.destroy();
     }
 
     /*
