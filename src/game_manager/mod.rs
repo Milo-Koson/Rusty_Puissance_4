@@ -12,11 +12,17 @@ pub struct GameManager {
 }
 
 impl GameManager {
-    pub fn new(tx_timer: Sender<Event>, rx_timer: Receiver<Event>) -> GameManager {
+    pub fn new(tx_timer: Sender<Event>, rx_timer: Receiver<Event>, tx_player_names: Sender<(String, String)>) -> GameManager {
+
+        // Crée le game data qui contient toutes les informations du jeu
+        let game_data = GameData::new();
+
+        // Envoi les informations du jeu au timer.
+        let _ = tx_player_names.send(game_data.get_player_names());
 
         // Demande aux joueurs de saisir leurs noms
         GameManager {
-            game_data: GameData::new(),
+            game_data,
             tx_timer,
             rx_timer
         }

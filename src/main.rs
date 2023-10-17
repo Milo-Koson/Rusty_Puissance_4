@@ -1,9 +1,8 @@
 use macroquad::prelude::*;
 
-use std::sync::mpsc::channel;
+use std::sync::mpsc::{channel, RecvError};
 
-use std::thread::{self, current};
-use std::time::Duration;
+use std::thread::{ self };
 
 use crate::game_manager::GameManager;
 use crate::timer_manager::TimerManager;
@@ -38,34 +37,42 @@ pub enum Event {
     End
 }
 
+fn game_started(name_player_1: &String, name_player_2: &String) -> bool {
+    if !name_player_1.is_empty() && !name_player_2.is_empty() {
+        return true;
+    }
+    false
+}
+
 #[macroquad::main(window_conf)]
 async fn main() {
-
-    let camera = Camera2D {
-        ..Default::default()
-    };
-    
-    // Fixe le centre de la camera aux coordonnées 0 x-axis and 0 y-axis. 
-    set_camera(&camera);
 
     // Créer les canaux entre game manager et timer manager 
     let (tx_timer, rx_timer) = channel::<Event>();
     let (tx_game_manager, rx_game_manager) = channel::<Event>();
-    
-    // Modifie les noms des joueurs avec les noms saisis
-    let mut game_manager = GameManager::new(tx_timer, rx_game_manager);
+
+    let (tx_player_names, rx_player_names) = channel::<(String, String)>();
 
     println!("Starting game ...");
-    // Run game manager
-    let (game_started, (name_player_1, name_player_2)) = game_manager.get_game_information();
 
+    // Création du thread du game manager
     let thread_game_manager = thread::spawn(move || {
+        // Crée le game manager
+        let mut game_manager = GameManager::new(tx_timer, rx_game_manager, tx_player_names);
+
+        // Boucle principale de la gestion du jeu
         game_manager.run_game();
     });
-    
-    if game_started {
+
+    // Récupère les informations du game manager avec les noms des joueurs, par réception bloquante du canal.
+    // let (game_started, (name_player_1, name_player_2)) = game_manager.get_game_information();
+
+    let Ok((name_player_1, name_player_2)) = rx_player_names.recv() else { panic!("Error recv names") };
+
+    if game_started(&name_player_1, &name_player_2) {
         // Si partie lancée, on démarre timer manager
-        let mut timer_manager = TimerManager::new(&name_player_1, &name_player_2, tx_game_manager);
+        let mut timer_manager = TimerManager::new(name_player_1, name_player_2, tx_game_manager);
+
         timer_manager.start();
         let mut end_game = false;
 

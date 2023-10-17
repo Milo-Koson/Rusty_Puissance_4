@@ -9,14 +9,14 @@ pub enum Player {
     Player2
 }
 
-pub struct PlayerTimes<'a> {
-    pub name_player: &'a str,
+pub struct PlayerTimes {
+    pub name_player: String,
     pub minutes : f64,
     pub seconds : f64
 }
 
-impl<'a> PlayerTimes<'a> {
-    fn new(name_player: &str) -> PlayerTimes {
+impl PlayerTimes {
+    fn new(name_player: String) -> PlayerTimes {
         PlayerTimes{
             name_player,
             minutes: START_TIME_MINUTES,
@@ -25,14 +25,14 @@ impl<'a> PlayerTimes<'a> {
     }
 }
 
-pub struct PlayersTimes<'a> {
+pub struct PlayersTimes {
     pub current_player: Player,
-    pub timer_player_1: PlayerTimes<'a>,
-    pub timer_player_2: PlayerTimes<'a>
+    pub timer_player_1: PlayerTimes,
+    pub timer_player_2: PlayerTimes
 }
 
-impl<'a> PlayersTimes<'a> {
-    pub fn new(name_player_1: &'a str, name_player_2: &'a str) -> PlayersTimes<'a> {
+impl PlayersTimes {
+    pub fn new(name_player_1: String, name_player_2: String) -> PlayersTimes {
         PlayersTimes {
             current_player: Player::Player1,
             timer_player_1: PlayerTimes::new(name_player_1),
@@ -40,7 +40,7 @@ impl<'a> PlayersTimes<'a> {
         }
     }
 
-    fn set_name_players(&mut self, name_player_1: &'a str, name_player_2: &'a str) {
+    fn set_name_players(&mut self, name_player_1: String, name_player_2: String) {
         self.timer_player_1.name_player = name_player_1;
         self.timer_player_2.name_player = name_player_2;
     }

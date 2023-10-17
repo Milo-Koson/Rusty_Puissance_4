@@ -10,16 +10,16 @@ mod timer_graphics;
 mod players_times;
 mod timer_tick;
 
-pub struct TimerManager<'a> {
+pub struct TimerManager {
     timer_graphics: TimerGraphics,
-    players_times: PlayersTimes<'a>,
+    players_times: PlayersTimes,
     rx_tick: Receiver<Tick>,
     tx_tick: Sender<EventTimerTick>,
     tx_game_manager: Sender<Event>
 }
 
-impl<'a> TimerManager<'a> {
-    pub(crate) fn new(name_player_1: &'a str, name_player_2: &'a str, tx_game_manager: Sender<Event>) -> TimerManager<'a> {
+impl TimerManager {
+    pub(crate) fn new(name_player_1: String, name_player_2: String, tx_game_manager: Sender<Event>) -> TimerManager {
 
         println!("Timer manager - New");
         // Crée deux canaux de communications pour le timer tick

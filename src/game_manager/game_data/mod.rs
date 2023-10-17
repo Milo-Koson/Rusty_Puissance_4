@@ -13,7 +13,7 @@ pub struct GameData {
 impl GameData {
     pub fn new() -> GameData {
         // On demande les noms des joueurs 
-        let (player1_name, player2_name) = players::set_player_names();
+        let (player1_name, player2_name) = set_player_names();
 
         let grid = grid::create_grid(6, 7);
         let player1 = Player::new(&player1_name, IdPlayer::Player1, "X");
