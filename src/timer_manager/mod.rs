@@ -21,8 +21,6 @@ pub struct TimerManager {
 
 impl TimerManager {
     pub(crate) fn new(name_player_1: String, name_player_2: String, tx_game_manager: Sender<Event>) -> TimerManager {
-
-        println!("Timer manager - New");
         // Crée deux canaux de communications pour le timer tick
         let (tx_for_timer_tick, rx_for_timer_tick) = channel();
         let (tx_for_timer_manager, rx_for_timer_manager) = channel();
@@ -33,7 +31,7 @@ impl TimerManager {
         });
 
         TimerManager {
-            timer_graphics: TimerGraphics::new(),
+            timer_graphics: TimerGraphics::new(name_player_1.clone(), name_player_2.clone()),
             players_times: PlayersTimes::new(name_player_1, name_player_2),
             rx_tick: rx_for_timer_manager,
             tx_tick: tx_for_timer_tick,
@@ -60,7 +58,7 @@ impl TimerManager {
                         return true;
                     },
                     false => {}
-                }   
+                }
             },
             Ok(_) => {},
             Err(_) => {}

@@ -27,7 +27,7 @@ pub fn run(rx_timer: Receiver<EventTimerTick>, tx_timer: Sender<Tick>) {
             println!("Timer tick - skipping ticks");
         },
         Ok(_) => {}
-        Err(_) => {println!("[ERREUR À DÉFINIR")},
+        Err(_) => {println!("[ERREUR À DÉFINIR]")},
     }
 
     while !end_game {
@@ -48,7 +48,7 @@ pub fn run(rx_timer: Receiver<EventTimerTick>, tx_timer: Sender<Tick>) {
                     println!("End timer received");
                     end_game = true;
                 }
-                _ => {}
+                ErrRec => {}
             }
         } 
     }

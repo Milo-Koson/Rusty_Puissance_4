@@ -1,6 +1,5 @@
-use std::{f64::consts::PI };
+use std::f64::consts::PI;
 use macroquad::prelude::*;
-
 
 const WINDOW_MIDDLE: f32 = 0.;
 
@@ -13,18 +12,16 @@ const HEIGHT_TIMER_PLAYERS: f32 = 0.25;
 
 const MARGIN_SELECTION_PLAYER: f32 = 0.03;
 
-const WINDOW_SIZE: i32 = 500;
-
-
 const TIMER_RADIUS: f32 = 0.9;
 const NEEDLES_RADIUS: f32 = TIMER_RADIUS - 0.08;
 
 pub struct TimerGraphics {
-    camera: Camera2D
+    name_player_1: String,
+    name_player_2: String
 }
 
 impl TimerGraphics {
-    pub fn new() -> TimerGraphics {
+    pub fn new(name_player_1: String, name_player_2: String) -> TimerGraphics {
         let camera = Camera2D {
             ..Default::default()
         };
@@ -34,15 +31,47 @@ impl TimerGraphics {
 
         // Retourne la camera
         TimerGraphics {
-            camera
+            name_player_1,
+            name_player_2
         }
     }
 
     pub async fn update_window(&self, p_1_min: f64, p_1_sec: f64, p_2_min: f64, p_2_sec: f64, id_current_player: i8) {
         display_bg().await;
         display_selection_player(id_current_player);
-        display_players(p_1_min, p_1_sec, p_2_min, p_2_sec);
+        self.display_players(p_1_min, p_1_sec, p_2_min, p_2_sec);
         displayer_needles(if id_current_player == 1 { p_1_sec } else { p_2_sec });
+    }
+
+
+    pub fn display_players(&self, player_1_minutes: f64, player_1_seconds: f64, player_2_minutes: f64, player_2_seconds: f64) {
+        // Player 1 name
+        draw_text_ex( "P1:", -0.95, Y_TIMER_PLAYERS - 0.05, get_params_players_name());
+        draw_text_ex( &self.name_player_1, -0.78, Y_TIMER_PLAYERS - 0.05, get_params_players_name());
+        draw_rectangle(X_TIMER_PLAYER_1, Y_TIMER_PLAYERS, WIDTH_TIMER_PLAYERS, HEIGHT_TIMER_PLAYERS, WHITE);
+        // Player 1 digital minutes
+        draw_text_ex( &player_1_minutes.to_string(), X_TIMER_PLAYER_1,
+                      Y_TIMER_PLAYERS + HEIGHT_TIMER_PLAYERS * 4. / 5., get_params_players_times());
+        // Two-points
+        draw_text_ex( ":", X_TIMER_PLAYER_1 + WIDTH_TIMER_PLAYERS * 2. / 5.,
+                      Y_TIMER_PLAYERS + HEIGHT_TIMER_PLAYERS * 4. / 5., get_params_players_times());
+        // Player 1 digital seconds
+        draw_text_ex( &player_1_seconds.to_string(), X_TIMER_PLAYER_1 + WIDTH_TIMER_PLAYERS * 4. / 7.,
+                      Y_TIMER_PLAYERS + HEIGHT_TIMER_PLAYERS * 4. / 5., get_params_players_times());
+    
+        // Player 2 name
+        draw_text_ex( "P2:", 0.05, Y_TIMER_PLAYERS - 0.05, get_params_players_name());
+        draw_text_ex( &self.name_player_2, 0.22, Y_TIMER_PLAYERS - 0.05, get_params_players_name());
+        draw_rectangle(X_TIMER_PLAYER_2, Y_TIMER_PLAYERS, WIDTH_TIMER_PLAYERS, HEIGHT_TIMER_PLAYERS, WHITE);
+        // Player 2 digital minutes
+        draw_text_ex( &player_2_minutes.to_string(), X_TIMER_PLAYER_2,
+                      Y_TIMER_PLAYERS + HEIGHT_TIMER_PLAYERS * 4. / 5., get_params_players_times());
+        // Two-points
+        draw_text_ex( ":", X_TIMER_PLAYER_2 + WIDTH_TIMER_PLAYERS*2./5.,
+                      Y_TIMER_PLAYERS + HEIGHT_TIMER_PLAYERS * 4. / 5., get_params_players_times());
+        // Player 2 digital seconds
+        draw_text_ex( &player_2_seconds.to_string(), X_TIMER_PLAYER_2 + WIDTH_TIMER_PLAYERS * 4. / 7.,
+                      Y_TIMER_PLAYERS + HEIGHT_TIMER_PLAYERS * 4. / 5., get_params_players_times());
     }
 }
 
@@ -50,23 +79,20 @@ impl TimerGraphics {
 fn get_params_time() -> TextParams<'static> {
     //let rotation = time*(1./12. as f32)*2.*PI as f32;
     let (font_size, font_scale, font_aspect) = camera_font_scale(0.15);
-    let text_params = TextParams { font_size, font_scale,  //rotation: rotation,
-        font_scale_aspect: font_aspect, color: BLACK, ..Default::default()};
-    return text_params;
+    TextParams { font_size, font_scale,  //rotation: rotation,
+        font_scale_aspect: font_aspect, color: BLACK, ..Default::default()}
 }
 
 fn get_params_players_name() -> TextParams<'static> {
     let (font_size, font_scale, font_aspect) = camera_font_scale(0.12);
-    let text_params = TextParams { font_size, font_scale,
-        font_scale_aspect: font_aspect, color: BLACK, ..Default::default()};
-    return text_params;
+    TextParams { font_size, font_scale,
+        font_scale_aspect: font_aspect, color: BLACK, ..Default::default()}
 }
 
 fn get_params_players_times() -> TextParams<'static> {
     let (font_size, font_scale, font_aspect) = camera_font_scale(0.3);
-    let text_params = TextParams { font_size, font_scale,
-        font_scale_aspect: font_aspect, color: BLACK, ..Default::default()};
-    return text_params;
+    TextParams { font_size, font_scale,
+        font_scale_aspect: font_aspect, color: BLACK, ..Default::default()}
 }
 
 pub async fn display_bg() {
@@ -92,36 +118,6 @@ pub async fn display_bg() {
     draw_text_ex( "12", WINDOW_MIDDLE- half_size_time * 2., -radius + half_size_time, get_params_time());
 }
 
-pub fn display_players(player_1_minutes: f64, player_1_seconds: f64, player_2_minutes: f64, player_2_seconds: f64) {
-    // Player 1 name
-    draw_text_ex( "P1:", -0.95, Y_TIMER_PLAYERS - 0.05, get_params_players_name());
-    draw_text_ex( "Player 1", -0.78, Y_TIMER_PLAYERS - 0.05, get_params_players_name());
-    draw_rectangle(X_TIMER_PLAYER_1, Y_TIMER_PLAYERS, WIDTH_TIMER_PLAYERS, HEIGHT_TIMER_PLAYERS, WHITE);
-    // Player 1 digital minutes
-    draw_text_ex( &player_1_minutes.to_string(), X_TIMER_PLAYER_1,
-                  Y_TIMER_PLAYERS + HEIGHT_TIMER_PLAYERS * 4. / 5., get_params_players_times());
-    // Two-points
-    draw_text_ex( &":", X_TIMER_PLAYER_1 + WIDTH_TIMER_PLAYERS * 2. / 5.,
-                  Y_TIMER_PLAYERS + HEIGHT_TIMER_PLAYERS * 4. / 5., get_params_players_times());
-    // Player 1 digital seconds
-    draw_text_ex( &player_1_seconds.to_string(), X_TIMER_PLAYER_1 + WIDTH_TIMER_PLAYERS * 4. / 7.,
-                  Y_TIMER_PLAYERS + HEIGHT_TIMER_PLAYERS * 4. / 5., get_params_players_times());
-
-    // Player 2 name
-    draw_text_ex( "P2:", 0.05, Y_TIMER_PLAYERS - 0.05, get_params_players_name());
-    draw_text_ex( "Player 2", 0.22, Y_TIMER_PLAYERS - 0.05, get_params_players_name());
-    draw_rectangle(X_TIMER_PLAYER_2, Y_TIMER_PLAYERS, WIDTH_TIMER_PLAYERS, HEIGHT_TIMER_PLAYERS, WHITE);
-    // Player 2 digital minutes
-    draw_text_ex( &player_2_minutes.to_string(), X_TIMER_PLAYER_2,
-                  Y_TIMER_PLAYERS + HEIGHT_TIMER_PLAYERS * 4. / 5., get_params_players_times());
-    // Two-points
-    draw_text_ex( &":", X_TIMER_PLAYER_2 + WIDTH_TIMER_PLAYERS*2./5.,
-                  Y_TIMER_PLAYERS + HEIGHT_TIMER_PLAYERS * 4. / 5., get_params_players_times());
-    // Player 2 digital seconds
-    draw_text_ex( &player_2_seconds.to_string(), X_TIMER_PLAYER_2 + WIDTH_TIMER_PLAYERS * 4. / 7.,
-                  Y_TIMER_PLAYERS + HEIGHT_TIMER_PLAYERS * 4. / 5., get_params_players_times());
-}
-
 pub fn display_selection_player(current_player: i8) {
     // Player designation
     if current_player == 1 {
@@ -136,10 +132,10 @@ pub fn display_selection_player(current_player: i8) {
 }
 
 pub fn displayer_needles(current_player_seconds: f64) {
-    let angular: f64;
+    
 
     // Compute the angular seconds.
-    angular = current_player_seconds*(PI/30.) - (PI/2.);
+    let angular = current_player_seconds*(PI/30.) - (PI/2.);
 
     // External circle timer
     draw_circle(WINDOW_MIDDLE, WINDOW_MIDDLE, (TIMER_RADIUS+0.03)/2., BLACK);

@@ -1,0 +1,14 @@
+
+pub struct Connect4Message {
+    connect_4_message: String
+}
+
+pub enum Connect4Error {
+    Connect4Message(connect_4_message),
+    ChannelRecv,
+    KeyboardRecv
+}
+
+impl Connect4Error {
+    
+}

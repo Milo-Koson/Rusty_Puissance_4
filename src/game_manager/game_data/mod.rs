@@ -104,6 +104,8 @@ impl GameData {
         }
     }
 
+
+    //Fonction is_game_over rédigée par ChatGPT
     pub fn is_game_over(&self) -> bool {
         let symbol_chars: Vec<char> = self.players.iter().map(|player| player.symbol.chars().next().unwrap()).collect();
         for row in &self.grid {
@@ -143,17 +145,8 @@ impl GameData {
     }    
 
     pub fn is_game_draw(&self) -> bool {
-        for row in &self.grid {
-            for cell in row {
-                if *cell == ' ' {
-                    // Il y a une case vide, le jeu n'est pas terminé
-                    return false;
-                }
-            }
-        }
-        
-        true
-    }
+        self.grid.iter().all(|row| row.iter().all(|&cell| cell != ' '))
+    }    
 
     pub fn timeout(&mut self) {
         self.game_over = true;
