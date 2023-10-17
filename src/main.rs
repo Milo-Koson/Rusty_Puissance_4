@@ -1,22 +1,25 @@
 use macroquad::prelude::*;
 
 use std::sync::mpsc::{channel, Sender, Receiver};
-
 use std::thread::{ self, JoinHandle };
 
 use crate::game_manager::GameManager;
-use crate::timer_manager::TimerManager;
-
 mod game_manager;
+
+use crate::timer_manager::TimerManager;
 mod timer_manager;
+
+const WINDOW_SIZE: i32 = 500;
 
 trait ConnectFourThreadObject {
 
-    // Quitte le thread associé à l'objet et le jeu
-    fn stop(&self);
-}
+    // Déclenchement d'un timeout par la fin du timer
+    fn timeout(&mut self);
 
-const WINDOW_SIZE: i32 = 500;
+    // dyn Error => Dans une Box . map_err () => Wrapper le type d'erreur
+    // Quitte le thread associé à l'objet et le jeu
+    fn destroy(&self);
+}
 
 fn window_conf() -> Conf {
     Conf {
@@ -59,7 +62,6 @@ async fn main() {
     // Créer les canaux entre game manager et timer manager 
     let (tx_timer, rx_timer) = channel::<Event>();
     let (tx_game_manager, rx_game_manager) = channel::<Event>();
-
     let (tx_player_names, rx_player_names) = channel::<(String, String)>();
 
     println!("Starting game ...");

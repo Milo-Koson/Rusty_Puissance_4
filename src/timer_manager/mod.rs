@@ -56,11 +56,7 @@ impl TimerManager {
                 let response_players_ticks = self.players_times.tick_time();
                 match response_players_ticks {
                     true => {
-                        println!("Timeout !! Félicitations au vainqueur : {} !! ", self.players_times.get_current_player_name());
-                        println!("Saisissez n'importe quoi pour quitter");
-                        // Envoi du temps écoulé à game manager
-                        let _ = self.tx_game_manager.send(Event::Timeout);
-                        let _ = self.tx_tick.send(EventTimerTick::End);
+                        self.timeout();
                         return true;
                     },
                     false => {}
@@ -89,7 +85,15 @@ impl TimerManager {
 
 impl ConnectFourThreadObject for TimerManager {
 
-    fn stop(&self) {
+    fn timeout(&mut self) {
+        println!("Timeout !! Félicitations au vainqueur : {} !! ", self.players_times.get_current_player_name());
+        println!("Saisissez n'importe quoi pour quitter");
+        // Envoi du temps écoulé à game manager
+        let _ = self.tx_game_manager.send(Event::Timeout);
+        let _ = self.tx_tick.send(EventTimerTick::End);
+    }
+
+    fn destroy(&self) {
         println!("Timer manager - End game / stop");
         // Envoi d'un signal pour arrêter le timer tick
         let _ = self.tx_tick.send(EventTimerTick::End);

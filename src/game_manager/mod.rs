@@ -38,9 +38,7 @@ impl GameManager {
             let response_timer = self.rx_timer.try_recv();
             match response_timer {
                 Ok(Event::Timeout) => {
-                    // Time out reçu de timer, on demande de quitter 
-                    println!("Merci d'avoir joué, aurevoir !");
-                    self.game_data.timeout();
+                    self.timeout();
                     return;
                 },
                 Ok(_) => {},
@@ -80,10 +78,17 @@ impl GameManager {
 }
 
 impl ConnectFourThreadObject for GameManager {
-    fn stop(&self) {
+    fn timeout(&mut self) {
+        // Time out reçu de timer, on demande de quitter
+        println!("Merci d'avoir joué, aurevoir !");
+        self.game_data.timeout();
+    }
+
+    fn destroy(&self) {
         // Affiche le gagnant
         self.game_data.display();
         println!("Le gagnant est : {} ", self.game_data.get_current_player_name());
         println!("Fin du jeu !");
     }
+
 }
