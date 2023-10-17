@@ -11,10 +11,6 @@ mod game_manager;
 mod timer_manager;
 
 const WINDOW_SIZE: i32 = 500;
-const WINDOW_MIDDLE: f32 = 0.;
-
-const START_TIME_MINUTES: f64 = 1.;
-const START_TIME_SECONDS: f64 = 2.;
 
 fn window_conf() -> Conf {
     Conf {
