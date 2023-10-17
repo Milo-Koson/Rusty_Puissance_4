@@ -10,6 +10,8 @@ mod timer_graphics;
 mod players_times;
 mod timer_tick;
 
+use crate::ConnectFourThreadObject;
+
 pub struct TimerManager {
     timer_graphics: TimerGraphics,
     players_times: PlayersTimes,
@@ -76,10 +78,15 @@ impl TimerManager {
         self.players_times.change_player();
     }
 
-    pub fn stop(&self) {
+}
 
+impl ConnectFourThreadObject for TimerManager {
+
+    fn stop(&self) {
         println!("Timer manager - End game / stop");
         // Envoi d'un signal pour arrêter le timer tick
         let _ = self.tx_tick.send(EventTimerTick::End);
     }
 }
+
+

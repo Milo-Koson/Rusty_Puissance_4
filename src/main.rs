@@ -10,6 +10,12 @@ use crate::timer_manager::TimerManager;
 mod game_manager;
 mod timer_manager;
 
+trait ConnectFourThreadObject {
+
+    // Quitte le thread associé à l'objet et le jeu
+    fn stop(&self);
+}
+
 const WINDOW_SIZE: i32 = 500;
 
 fn window_conf() -> Conf {

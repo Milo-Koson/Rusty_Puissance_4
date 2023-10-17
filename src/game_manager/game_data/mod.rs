@@ -27,7 +27,7 @@ impl GameData {
         }
     }
 
-    pub fn get_name(&self) -> &str {
+    pub fn get_current_player_name(&self) -> &str {
         &self.players[self.current_player].name
     }
 

@@ -3,7 +3,7 @@ use std::sync::mpsc::{Sender, Receiver};
 use self::game_data::GameData;
 mod game_data;
 
-use crate::Event;
+use crate::{ConnectFourThreadObject, Event};
 
 pub struct GameManager {
     game_data: GameData,
@@ -51,10 +51,7 @@ impl GameManager {
             }
         }
 
-        // Affiche le gagnant
-        self.game_data.display();
-        println!("Le gagnant est : {} ", self.game_data.get_name());
-        println!("Fin du jeu !");
+        self.stop();
     }
 
     pub fn get_game_information(&self) -> (bool, (String, String)) {
@@ -62,5 +59,14 @@ impl GameManager {
             return (false, ("".to_string(), "".to_string()));
         } 
         (true, self.game_data.get_player_names())
+    }
+}
+
+impl ConnectFourThreadObject for GameManager {
+    fn stop(&self) {
+        // Affiche le gagnant
+        self.game_data.display();
+        println!("Le gagnant est : {} ", self.game_data.get_current_player_name());
+        println!("Fin du jeu !");
     }
 }
