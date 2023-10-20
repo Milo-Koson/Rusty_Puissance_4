@@ -1,13 +1,16 @@
+use std::ptr::null;
 use macroquad::prelude::*;
 
-use std::sync::mpsc::{channel, Sender, Receiver};
+use std::sync::mpsc::{channel, Sender, Receiver, RecvError, TryRecvError};
 use std::thread::{ self, JoinHandle };
+use crate::connect_4_error::{Connect4Error, Connect4Result};
 
 use crate::game_manager::GameManager;
 mod game_manager;
 
 use crate::timer_manager::TimerManager;
 mod timer_manager;
+mod connect_4_error;
 
 const WINDOW_SIZE: i32 = 500;
 
@@ -32,7 +35,7 @@ fn window_conf() -> Conf {
     }
 }
 
-fn init_timer_manager(tx_timer: Sender<Event>, rx_game_manager: Receiver<Event>, tx_player_names: Sender<(String, String)>) -> JoinHandle<()> {
+fn init_timer_manager(tx_timer: Sender<Event>, rx_game_manager: Receiver<Event>, tx_player_names: Sender<String>) -> JoinHandle<()> {
     thread::spawn(move || {
         // Crée le game manager
         let mut game_manager = GameManager::new(tx_timer, rx_game_manager, tx_player_names);
@@ -57,12 +60,12 @@ fn game_started(name_player_1: &String, name_player_2: &String) -> bool {
 }
 
 #[macroquad::main(window_conf)]
-async fn main() {
+async fn main() -> Connect4Result<Connect4Error> {
 
     // Créer les canaux entre game manager et timer manager 
     let (tx_timer, rx_timer) = channel::<Event>();
     let (tx_game_manager, rx_game_manager) = channel::<Event>();
-    let (tx_player_names, rx_player_names) = channel::<(String, String)>();
+    let (tx_player_names, rx_player_names) = channel::<String>();
 
     println!("Starting game ...");
 
@@ -72,7 +75,22 @@ async fn main() {
     // Récupère les informations du game manager avec les noms des joueurs, par réception bloquante du canal.
     // let (game_started, (name_player_1, name_player_2)) = game_manager.get_game_information();
 
-    let Ok((name_player_1, name_player_2)) = rx_player_names.recv() else { panic!("Error recv names") };
+    //let Ok((name_player_1, name_player_2)) = rx_player_names.recv().ok_or(Connect4Error::ChannelRecv);
+
+    //let mut name_player_1 = rx_player_names.recv().ok_or(Connect4Error::ChannelRecv);
+    let mut name_player_1 = "".to_string();
+    let mut name_player_2 = "".to_string();
+
+    match rx_player_names.recv() {
+        Ok(name_player_1_recv) => name_player_1 = name_player_1_recv,
+        Err(e) => {}
+    }
+
+    match rx_player_names.recv() {
+        Ok(name_player_2_recv) => {name_player_2 = name_player_2_recv;},
+        Err(e) => {}
+    }
+    //let name_player_2 = rx_player_names.recv().ok_or(Connect4Error::ChannelRecv);
 
     if game_started(&name_player_1, &name_player_2) {
         // Si partie lancée, on démarre timer manager
@@ -81,13 +99,19 @@ async fn main() {
         timer_manager.start();
         let mut end_game = false;
 
-        while !end_game {
+        while !timer_manager.is_end_game() {
 
-            end_game = timer_manager.run().await;
-    
+            match timer_manager.run().await? {
+                () => {}
+                _ => {
+                    println!("Error run timer manager");
+                    return Err(Connect4Error::Ok);
+                }
+            }
+
             // Si un endgame a déjà été signalé par temps écoulé, on ve vérifie pas de message dans le
             // canal du state manager
-            if !end_game {
+            //if !end_game {
                 // Vérifie si endgame par victoire, envoyé par state manager
                 let response_from_state_manager = rx_timer.try_recv();
     
@@ -96,19 +120,22 @@ async fn main() {
                     Ok(Event::End) => {
                         end_game = true;
                     },
-                    _ => print!("")
+                    _ => {}
                 }
-            }
+            //}
             next_frame().await;
         }
-        
+
         timer_manager.destroy();
         println!("Main - END GAME");
     } else {
         println!("Game not started ...");
     }
 
+    // Attente du thread de game manager
     let _ = thread_game_manager.join();
 
+    // Quitte le programme avec un résultat satisfaisant
+    Ok(Connect4Error::Ok)
 }
 

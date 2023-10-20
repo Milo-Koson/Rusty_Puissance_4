@@ -1,5 +1,6 @@
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
+use crate::connect_4_error::{Connect4Error, Connect4Result};
 use crate::Event;
 use crate::timer_manager::players_times::PlayersTimes;
 use crate::timer_manager::timer_graphics::TimerGraphics;
@@ -16,7 +17,8 @@ pub struct TimerManager {
     players_times: PlayersTimes,
     rx_tick: Receiver<Tick>,
     tx_tick: Sender<EventTimerTick>,
-    tx_game_manager: Sender<Event>
+    tx_game_manager: Sender<Event>,
+    end_game: bool
 }
 
 impl TimerManager {
@@ -35,7 +37,8 @@ impl TimerManager {
             players_times: PlayersTimes::new(name_player_1, name_player_2),
             rx_tick: rx_for_timer_manager,
             tx_tick: tx_for_timer_tick,
-            tx_game_manager
+            tx_game_manager,
+            end_game: false
         }
     }
 
@@ -43,7 +46,7 @@ impl TimerManager {
         let _ = self.tx_tick.send(EventTimerTick::Start);
     }
 
-    pub async fn run(&mut self) -> bool {
+    pub async fn run(&mut self) -> Connect4Result<()> {
 
         // Vérifie le tick dans le canal venant du tick
         let response_tick = self.rx_tick.try_recv();
@@ -55,28 +58,42 @@ impl TimerManager {
                 match response_players_ticks {
                     true => {
                         self.timeout();
-                        return true;
+                        self.end_game = true;
+                        Ok::<(), Connect4Error>(())
                     },
-                    false => {}
+                    false => {
+                        // Met à jour la fenêtre graphique
+                        self.timer_graphics.update_window(
+                            self.players_times.timer_player_1.minutes, self.players_times.timer_player_1.seconds,
+                            self.players_times.timer_player_2.minutes, self.players_times.timer_player_2.seconds,
+                            self.players_times.id_current_player()
+                        ).await?;
+                        Ok(())
+                    }
                 }
             },
-            Ok(_) => {},
-            Err(_) => {}
+            Err(_) => {
+                // Met à jour la fenêtre graphique
+                self.timer_graphics.update_window(
+                    self.players_times.timer_player_1.minutes, self.players_times.timer_player_1.seconds,
+                    self.players_times.timer_player_2.minutes, self.players_times.timer_player_2.seconds,
+                    self.players_times.id_current_player()
+                ).await?;
+                Ok(())
+            }
         }
+            .ok();
 
-        // Met à jour la fenêtre graphique
-        self.timer_graphics.update_window(
-            self.players_times.timer_player_1.minutes, self.players_times.timer_player_1.seconds,
-            self.players_times.timer_player_2.minutes, self.players_times.timer_player_2.seconds,
-            self.players_times.id_current_player()
-        ).await;
-
-        false
+        Ok(())
     }
 
     pub fn change_player(&mut self) {
         println!("Timer manager change player");
         self.players_times.change_player();
+    }
+
+    pub fn is_end_game(&self) -> bool {
+        self.end_game
     }
 
 }

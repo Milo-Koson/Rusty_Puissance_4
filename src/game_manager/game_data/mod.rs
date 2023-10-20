@@ -33,8 +33,8 @@ impl GameData {
         &self.players[self.current_player].name
     }
 
-    pub fn get_player_names(&self) -> (String, String) {
-        (self.players[0].name.to_string(), self.players[1].name.to_string())
+    pub fn get_player_names(&self, n_player: i8) -> String {
+        if n_player == 1 { self.players[0].name.to_string() } else { self.players[1].name.to_string() }
     }
 
     pub fn display(&self) {

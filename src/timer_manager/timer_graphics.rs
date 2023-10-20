@@ -1,5 +1,6 @@
 use std::f64::consts::PI;
 use macroquad::prelude::*;
+use crate::connect_4_error::{Connect4Error, Connect4Result};
 
 const WINDOW_MIDDLE: f32 = 0.;
 
@@ -36,11 +37,13 @@ impl TimerGraphics {
         }
     }
 
-    pub async fn update_window(&self, p_1_min: f64, p_1_sec: f64, p_2_min: f64, p_2_sec: f64, id_current_player: i8) {
-        display_bg().await;
+    pub async fn update_window(&self, p_1_min: f64, p_1_sec: f64, p_2_min: f64, p_2_sec: f64, id_current_player: i8)
+        -> Connect4Result<()> {
+        display_bg().await?;
         display_selection_player(id_current_player);
         self.display_players(p_1_min, p_1_sec, p_2_min, p_2_sec);
         displayer_needles(if id_current_player == 1 { p_1_sec } else { p_2_sec });
+        Ok(())
     }
 
 
@@ -95,7 +98,7 @@ fn get_params_players_times() -> TextParams<'static> {
         font_scale_aspect: font_aspect, color: BLACK, ..Default::default()}
 }
 
-pub async fn display_bg() {
+pub async fn display_bg() -> Connect4Result<()> {
 
     // Display each time
     let radius = 0.55;
@@ -116,6 +119,8 @@ pub async fn display_bg() {
     draw_text_ex( "10", -radius_three_quarter - half_size_time * 3., -radius_half + half_size_time, get_params_time());
     draw_text_ex( "11", -radius_half- half_size_time * 2., -radius_three_quarter + half_size_time, get_params_time());
     draw_text_ex( "12", WINDOW_MIDDLE- half_size_time * 2., -radius + half_size_time, get_params_time());
+
+    Ok(())
 }
 
 pub fn display_selection_player(current_player: i8) {
