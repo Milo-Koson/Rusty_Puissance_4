@@ -2,6 +2,8 @@ mod grid;
 
 mod players;
 
+use crate::connect_4_error::{Connect4Error, self};
+
 //::{Player, IdPlayer, self}; 
 use self::players::*;
 
@@ -41,21 +43,12 @@ impl GameData {
         grid::display_grid(&self.grid);
     }
 
-    pub fn make_move(&mut self, column: usize) -> Result<(), &str> {
+    pub fn make_move(&mut self, column: usize) -> Result<(), Connect4Error> {
        
         if column >= self.grid[0].len() {
             self.display();
-            return Err("La colonne n'est pas valide, veuillez en choisir une autre");
+            return Err(Connect4Error::InvalidInput);
         }
-
-        // Ancienne version de la boucle
-        // let mut row = None;
-        // for r in (0..self.grid.len()).rev() {
-        //     if self.grid[r][column] == ' ' {
-        //         row = Some(r);
-        //         break;
-        //     }
-        // }
 
         let row = self.grid.iter_mut().rev().find(|r| r[column] == ' ');
 
@@ -71,11 +64,11 @@ impl GameData {
             Ok(())
         }
         else {
-            Err("La colonne est pleine, veuillez en choisir une autre")
+            Err(Connect4Error::ColumnFull)
         }
     }
 
-    pub fn play_game(&mut self) {
+    pub fn play_game(&mut self) -> Result<(), Connect4Error> {
         
         // Détermine le joueur courant
         let current_player = &self.players[self.current_player];
@@ -97,11 +90,16 @@ impl GameData {
                     // Effacement de la grille de jeu pour actualiser le terminal
                     clearscreen::clear().expect("Échec de l'effacement de l'écran !");
                 }
+                Err(Connect4Error::InvalidInput) => {
+                    return Err(Connect4Error::InvalidInput);
+                }
                 Err(err) => {
                     println!("Erreur : {}", err);
+                    return Err(err);
                 }
             }
         }
+        Ok(())
     }
 
 

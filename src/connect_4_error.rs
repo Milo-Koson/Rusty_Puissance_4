@@ -24,7 +24,9 @@ pub enum Connect4Error {
     KeyboardRecvUnknown,
     AwaitError,
     ErrorUnknown,
-    GraphicalError
+    GraphicalError,
+    InvalidInput,
+    ColumnFull
 }
 
 impl fmt::Display for Connect4Error {
@@ -38,6 +40,10 @@ impl fmt::Display for Connect4Error {
                 write!(f, "[CONNECT_4_ERROR] - Keyboard Recv Pass"),
             Connect4Error::ErrorUnknown =>
                 write!(f, "[CONNECT_4_ERROR] - Error Unknown"),
+            Connect4Error::InvalidInput =>
+                write!(f, "[CONNECT_4_ERROR] - Input Error"),
+            Connect4Error::ColumnFull =>
+                write!(f, "[CONNECT_4_ERROR] - Column is full"),
             _ =>
                 write!(f, "[CONNECT_4_ERROR] - huh ?"),
         }
