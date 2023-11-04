@@ -106,10 +106,8 @@ impl ConnectFourThreadObject for TimerManager {
     }
 
     fn destroy(&self) {
-        println!("Timer manager - End game / stop");
+        //println!("Timer manager - End game / stop");
         // Envoi d'un signal pour arrêter le timer tick
         let _ = self.tx_tick.send(EventTimerTick::End);
     }
 }
-
-

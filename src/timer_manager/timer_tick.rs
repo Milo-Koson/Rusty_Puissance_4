@@ -11,7 +11,7 @@ pub enum Tick {
 
 pub fn run(rx_timer: Receiver<EventTimerTick>, tx_timer: Sender<Tick>) {
 
-    println!("Timer tick - Run");
+    //println!("Timer tick - Run");
 
     let mut end_game = false;
 

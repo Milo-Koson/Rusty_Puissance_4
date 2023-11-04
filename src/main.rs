@@ -1,8 +1,8 @@
-use std::fmt::Display;
-use std::ptr::null;
+// use std::fmt::Display;
+// use std::ptr::null;
 use macroquad::prelude::*;
 
-use std::sync::mpsc::{channel, Sender, Receiver, RecvError, TryRecvError};
+use std::sync::mpsc::{channel, Sender, Receiver};
 use std::thread::{ self, JoinHandle };
 use crate::connect_4_error::{Connect4Error, Connect4Result};
 
@@ -53,7 +53,7 @@ fn init_timer_manager(tx_timer: Sender<Event>, rx_game_manager: Receiver<Event>,
         Ok(())
     });
 
-    return Ok(game_manager_thread)
+    Ok(game_manager_thread)
 }
 
 // Évènements échangés entre les objets
@@ -79,7 +79,7 @@ async fn main() -> Connect4Result<()> {
     let (tx_game_manager, rx_game_manager) = channel::<Event>();
     let (tx_player_names, rx_player_names) = channel::<String>();
 
-    println!("Starting game ...");
+    //println!("Starting game ...");
 
     // Création du thread du game manager
     let game_manager_thread;
@@ -122,7 +122,7 @@ async fn main() -> Connect4Result<()> {
         match response_from_state_manager {
             Ok(Event::PlayerChange) => timer_manager.change_player(),
             Ok(Event::End) => {
-                println!("ENVOI ENDGAME");
+                //println!("ENVOI ENDGAME");
                 // Envoi la fin du jeu au timer manager
                 match timer_manager.end_game() {
                     Ok(()) => {}
@@ -135,7 +135,7 @@ async fn main() -> Connect4Result<()> {
     }
 
     timer_manager.destroy();
-    println!("Main - END GAME");
+    //println!("Main - END GAME");
 
     // Attente du thread de game manager
     let _ = game_manager_thread.join();

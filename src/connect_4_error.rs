@@ -17,7 +17,6 @@ Il est possible d'utiliser and_then() pour effectuer des instructions
 pub enum Connect4Error {
     ChannelRecv,
     ChannelSend,
-    KeyboardRecvUnknown,
     GraphicalTimerError,
     InvalidInput,
     ColumnFull
@@ -30,8 +29,6 @@ impl fmt::Display for Connect4Error {
             write!(f, "[CONNECT_4_ERROR] - Channel Recv"),
             Connect4Error::ChannelSend =>
                 write!(f, "[CONNECT_4_ERROR] - Channel Send"),
-            Connect4Error::KeyboardRecvUnknown =>
-                write!(f, "[CONNECT_4_ERROR] - Keyboard Recv Unknown"),
             Connect4Error::InvalidInput =>
                 write!(f, "[CONNECT_4_ERROR] - Input Error"),
             Connect4Error::ColumnFull =>

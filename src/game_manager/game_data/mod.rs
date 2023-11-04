@@ -2,7 +2,7 @@ mod grid;
 
 mod players;
 
-use crate::connect_4_error::{Connect4Error, self};
+use crate::connect_4_error::{Connect4Error, Connect4Result};
 
 //::{Player, IdPlayer, self}; 
 use self::players::*;
@@ -66,7 +66,7 @@ impl GameData {
         else {
             Err(Connect4Error::ColumnFull)
         }
-    }
+    }      
 
     pub fn play_game(&mut self) -> Result<(), Connect4Error> {
         
@@ -139,7 +139,7 @@ impl GameData {
         }
     
         false
-    }    
+    }
 
     pub fn is_game_draw(&self) -> bool {
         self.grid.iter().all(|row| row.iter().all(|&cell| cell != ' '))
