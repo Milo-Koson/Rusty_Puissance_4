@@ -93,9 +93,8 @@ impl GameData {
                 Err(Connect4Error::InvalidInput) => {
                     return Err(Connect4Error::InvalidInput);
                 }
-                Err(err) => {
-                    println!("Erreur : {}", err);
-                    return Err(err);
+                Err(connect_4_error) => {
+                    return Err(connect_4_error);
                 }
             }
         }

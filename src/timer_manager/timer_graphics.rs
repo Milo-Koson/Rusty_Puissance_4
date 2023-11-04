@@ -38,7 +38,8 @@ impl TimerGraphics {
     }
 
     pub async fn update_window(&self, p_1_min: f64, p_1_sec: f64, p_2_min: f64, p_2_sec: f64, id_current_player: i8)
-        -> Connect4Result<()> {
+        -> Result<(), Connect4Error> {
+
         display_bg().await?;
         display_selection_player(id_current_player);
         self.display_players(p_1_min, p_1_sec, p_2_min, p_2_sec);
@@ -98,7 +99,7 @@ fn get_params_players_times() -> TextParams<'static> {
         font_scale_aspect: font_aspect, color: BLACK, ..Default::default()}
 }
 
-pub async fn display_bg() -> Connect4Result<()> {
+pub async fn display_bg() -> Result<(), Connect4Error>{
 
     // Display each time
     let radius = 0.55;
@@ -137,7 +138,6 @@ pub fn display_selection_player(current_player: i8) {
 }
 
 pub fn displayer_needles(current_player_seconds: f64) {
-    
 
     // Compute the angular seconds.
     let angular = current_player_seconds*(PI/30.) - (PI/2.);

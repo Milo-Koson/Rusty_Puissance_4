@@ -1,4 +1,6 @@
 use std::fmt;
+use std::sync::mpsc::SendError;
+use crate::EventTimerTick;
 
 pub type Connect4Result<T> = Result<T, Connect4Error>;
 
@@ -10,21 +12,13 @@ fct_avec_resultat()
 NB: Retourne le type Connect4Result si erreur avec le bon enum.
 Il est possible d'utiliser and_then() pour effectuer des instructions
 */
-/*
-#[derive(Debug)]
-pub struct Connect4Message {
-    connect_4_message: String
-}*/
 
 #[derive(Debug)]
 pub enum Connect4Error {
-    Ok,
     ChannelRecv,
-    KeyboardRecvPass,
+    ChannelSend,
     KeyboardRecvUnknown,
-    AwaitError,
-    ErrorUnknown,
-    GraphicalError,
+    GraphicalTimerError,
     InvalidInput,
     ColumnFull
 }
@@ -34,18 +28,24 @@ impl fmt::Display for Connect4Error {
         match self {
             Connect4Error::ChannelRecv =>
             write!(f, "[CONNECT_4_ERROR] - Channel Recv"),
+            Connect4Error::ChannelSend =>
+                write!(f, "[CONNECT_4_ERROR] - Channel Send"),
             Connect4Error::KeyboardRecvUnknown =>
                 write!(f, "[CONNECT_4_ERROR] - Keyboard Recv Unknown"),
-            Connect4Error::KeyboardRecvPass =>
-                write!(f, "[CONNECT_4_ERROR] - Keyboard Recv Pass"),
-            Connect4Error::ErrorUnknown =>
-                write!(f, "[CONNECT_4_ERROR] - Error Unknown"),
             Connect4Error::InvalidInput =>
                 write!(f, "[CONNECT_4_ERROR] - Input Error"),
             Connect4Error::ColumnFull =>
                 write!(f, "[CONNECT_4_ERROR] - Column is full"),
             _ =>
                 write!(f, "[CONNECT_4_ERROR] - huh ?"),
+        }
+    }
+}
+
+impl From<SendError<EventTimerTick>> for Connect4Error {
+    fn from(value: SendError<EventTimerTick>) -> Self {
+        match value {
+            SendError(_) => Connect4Error::ChannelSend
         }
     }
 }

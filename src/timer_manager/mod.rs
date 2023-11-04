@@ -1,10 +1,10 @@
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
 use crate::connect_4_error::{Connect4Error, Connect4Result};
-use crate::Event;
+use crate::{Event, EventTimerTick};
 use crate::timer_manager::players_times::PlayersTimes;
 use crate::timer_manager::timer_graphics::TimerGraphics;
-use crate::timer_manager::timer_tick::{EventTimerTick, Tick};
+use crate::timer_manager::timer_tick::{Tick};
 
 mod timer_graphics;
 mod players_times;
@@ -46,7 +46,7 @@ impl TimerManager {
         let _ = self.tx_tick.send(EventTimerTick::Start);
     }
 
-    pub async fn run(&mut self) -> Connect4Result<()> {
+    pub async fn run(&mut self) -> Result<(), Connect4Error> {
 
         // Vérifie le tick dans le canal venant du tick
         let response_tick = self.rx_tick.try_recv();
@@ -61,28 +61,18 @@ impl TimerManager {
                         self.end_game = true;
                         Ok::<(), Connect4Error>(())
                     },
-                    false => {
-                        // Met à jour la fenêtre graphique
-                        self.timer_graphics.update_window(
-                            self.players_times.timer_player_1.minutes, self.players_times.timer_player_1.seconds,
-                            self.players_times.timer_player_2.minutes, self.players_times.timer_player_2.seconds,
-                            self.players_times.id_current_player()
-                        ).await?;
-                        Ok(())
-                    }
+                    false => Ok({})
                 }
             },
-            Err(_) => {
-                // Met à jour la fenêtre graphique
-                self.timer_graphics.update_window(
-                    self.players_times.timer_player_1.minutes, self.players_times.timer_player_1.seconds,
-                    self.players_times.timer_player_2.minutes, self.players_times.timer_player_2.seconds,
-                    self.players_times.id_current_player()
-                ).await?;
-                Ok(())
-            }
-        }
-            .ok();
+            _ => Ok({})
+        }.ok();
+
+        // Met à jour la fenêtre graphique
+        self.timer_graphics.update_window(
+            self.players_times.timer_player_1.minutes, self.players_times.timer_player_1.seconds,
+            self.players_times.timer_player_2.minutes, self.players_times.timer_player_2.seconds,
+            self.players_times.id_current_player()
+        ).await?;
 
         Ok(())
     }
@@ -106,6 +96,13 @@ impl ConnectFourThreadObject for TimerManager {
         // Envoi du temps écoulé à game manager
         let _ = self.tx_game_manager.send(Event::Timeout);
         let _ = self.tx_tick.send(EventTimerTick::End);
+    }
+
+    // Fin du jeu reçu par le game_manager, alerte le timer_tick
+    fn end_game(&mut self) -> Result<(), Connect4Error> {
+        self.end_game = true;
+        self.tx_tick.send(EventTimerTick::End)?;
+        Ok(())
     }
 
     fn destroy(&self) {

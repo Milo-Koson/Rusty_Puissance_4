@@ -3,12 +3,7 @@ use std::sync::mpsc::{Receiver, Sender}; //RecvError
 
 use std::thread;
 use std::time::Duration;
-
-pub enum EventTimerTick {
-    Start = 0,
-    Pause,
-    End
-}
+use crate::EventTimerTick;
 
 pub enum Tick {
     Tick
