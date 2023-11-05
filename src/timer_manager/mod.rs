@@ -1,6 +1,6 @@
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
-use crate::connect_4_error::{Connect4Error, Connect4Result};
+use crate::connect_4_error::Connect4Error;
 use crate::{Event, EventTimerTick};
 use crate::timer_manager::players_times::PlayersTimes;
 use crate::timer_manager::timer_graphics::TimerGraphics;
@@ -12,6 +12,10 @@ mod timer_tick;
 
 use crate::ConnectFourThreadObject;
 
+/**
+Structure qui comporte les instances des objets, canaux de communication et l'état de la partie
+liés à la gestion du temps.
+*/
 pub struct TimerManager {
     timer_graphics: TimerGraphics,
     players_times: PlayersTimes,
@@ -21,15 +25,23 @@ pub struct TimerManager {
     end_game: bool
 }
 
+/**
+Implémente les fonctions de la structure de TimerManager
+*/
 impl TimerManager {
+    /**
+    Crée et renvoie une instance de TimerManager en prenant en paramètre les noms des joueurs et
+    le canal d'envoi de communication pour le game_manager.
+    */
     pub(crate) fn new(name_player_1: String, name_player_2: String, tx_game_manager: Sender<Event>) -> TimerManager {
-        // Crée deux canaux de communications pour le timer tick
+        // Crée deux canaux de communications pour le timer tick (deux sens de communications)
         let (tx_for_timer_tick, rx_for_timer_tick) = channel();
         let (tx_for_timer_manager, rx_for_timer_manager) = channel();
 
         // Création du thread du timer tick
-        let _ = thread::spawn(move || {
-            timer_tick::run(rx_for_timer_tick, tx_for_timer_manager);
+        let _ = thread::spawn(move || -> Result<(), Connect4Error> {
+            timer_tick::run(rx_for_timer_tick, tx_for_timer_manager)?;
+            Ok(())
         });
 
         TimerManager {
@@ -42,17 +54,25 @@ impl TimerManager {
         }
     }
 
+    /**
+    Envoie le start au timer_tick qui commencera le décompte.
+    */
     pub fn start(&self) {
         let _ = self.tx_tick.send(EventTimerTick::Start);
     }
 
+    /**
+    Fonction principale du timer_manager pour rafraîchir la fenêtre du timer et récupérer les ticks
+    du timer_tick.
+    */
     pub async fn run(&mut self) -> Result<(), Connect4Error> {
 
-        // Vérifie le tick dans le canal venant du tick
+        // Vérifie un tick provenant du timer_tick, de façon non-bloquant.
         let response_tick = self.rx_tick.try_recv();
 
         // Si tick, met à jour le temps du joueur courant
         match response_tick {
+            // Présence d'un tick, on met à jour le temps du joueur courant.
             Ok(Tick::Tick) => {
                 let response_players_ticks = self.players_times.tick_time();
                 match response_players_ticks {
@@ -77,37 +97,53 @@ impl TimerManager {
         Ok(())
     }
 
+    /**
+    Interverti de joueur courant.
+    */
     pub fn change_player(&mut self) {
-        println!("Timer manager change player");
         self.players_times.change_player();
     }
 
+    /**
+    Renvoie un booléen en fonction de l'état du jeu. Vrai si fin de jeu, sinon faux.
+    */
     pub fn is_end_game(&self) -> bool {
         self.end_game
     }
 
 }
 
+/**
+Implémentation des fonctions manager du jeu.
+*/
 impl ConnectFourThreadObject for TimerManager {
 
+    /**
+    Temps écoulé pour le joueur courant. Affiche la victoire de l'autre joueur et averti les
+    autres objets (game_manager et timer_tick).
+    */
     fn timeout(&mut self) {
         println!("Timeout !! Félicitations au vainqueur : {} !! ", self.players_times.get_current_player_name());
         println!("Saisissez n'importe quoi pour quitter");
-        // Envoi du temps écoulé à game manager
+        // Envoi du temps écoulé à game manager et timer_tick
         let _ = self.tx_game_manager.send(Event::Timeout);
         let _ = self.tx_tick.send(EventTimerTick::End);
     }
 
-    // Fin du jeu reçu par le game_manager, alerte le timer_tick
+
+    /**
+    Fin du jeu envoyé par game_manager. Averti le timer_tick de la fin du jeu.
+    */
     fn end_game(&mut self) -> Result<(), Connect4Error> {
         self.end_game = true;
         self.tx_tick.send(EventTimerTick::End)?;
         Ok(())
     }
 
+    /**
+    Arrête
+    */
     fn destroy(&self) {
-        //println!("Timer manager - End game / stop");
-        // Envoi d'un signal pour arrêter le timer tick
         let _ = self.tx_tick.send(EventTimerTick::End);
     }
 }

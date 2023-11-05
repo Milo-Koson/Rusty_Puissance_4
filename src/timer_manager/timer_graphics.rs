@@ -1,6 +1,6 @@
 use std::f64::consts::PI;
 use macroquad::prelude::*;
-use crate::connect_4_error::{Connect4Error, Connect4Result};
+use crate::connect_4_error::Connect4Error;
 
 const WINDOW_MIDDLE: f32 = 0.;
 

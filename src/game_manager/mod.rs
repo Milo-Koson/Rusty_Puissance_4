@@ -79,22 +79,30 @@ impl GameManager {
 }
 
 impl ConnectFourThreadObject for GameManager {
+    /**
+    Temps écoulé reçu dans game_manager par le timer_manager.
+    */
     fn timeout(&mut self) {
         // Time out reçu de timer, on demande de quitter
         println!("Merci d'avoir joué, aurevoir !");
         self.game_data.timeout();
     }
 
-    // Fin du jeu détecté par le game_manager, alerte le timer_manager
+    /**
+    Fin du jeu détecté par le game_manager, alerte le timer_manager
+    */
     fn end_game(&mut self) -> Result<(), Connect4Error> {
         // Envoi au timer de terminer la partie
         let _ = self.tx_timer.send(Event::End);
         Ok(())
     }
 
+    /**
+    Fin du jeu pour le game_manager.
+    */
     fn destroy(&self) {
-        // Affiche le gagnant
         self.game_data.display();
+        // Affiche le gagnant
         println!("Le gagnant est : {} ", self.game_data.get_current_player_name());
         println!("Fin du jeu !");
     }

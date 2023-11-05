@@ -3,28 +3,36 @@ use std::sync::mpsc::{Receiver, Sender}; //RecvError
 
 use std::thread;
 use std::time::Duration;
+use crate::connect_4_error::Connect4Error;
 use crate::EventTimerTick;
 
+/**
+Enumération pour le tick du décomptage du temps.
+*/
 pub enum Tick {
     Tick
 }
 
-pub fn run(rx_timer: Receiver<EventTimerTick>, tx_timer: Sender<Tick>) {
+/**
+Boucle principale du décomptage du temps.
+*/
+pub fn run(rx_timer: Receiver<EventTimerTick>, tx_timer: Sender<Tick>) -> Result<(), Connect4Error>{
 
-    //println!("Timer tick - Run");
-
+    // Atteste de l'arrêt de la partie.
     let mut end_game = false;
 
+    // Attente du start envoyé par le timer_manager.
     match rx_timer.recv()
     {
+        // Fin du jeu demandé avant le début de la partie.
         Ok(EventTimerTick::End) =>  {
             end_game = true;
-            println!("Timer tick - skipping ticks");
         },
-        Ok(_) => {}
-        Err(_) => {println!("[ERREUR À DÉFINIR]")},
+        Ok(_) => {},
+        Err(_) => return Err(Connect4Error::ChannelRecv)
     }
 
+    // Tant que la partie n'est pas finie, on continue de décompter.
     while !end_game {
 
         // Wait for 1 sec
@@ -32,21 +40,17 @@ pub fn run(rx_timer: Receiver<EventTimerTick>, tx_timer: Sender<Tick>) {
         //println!("tick");
         let _ = tx_timer.send(Tick::Tick);
 
-        // Check if we should pause or quit.
+        // Vérification d'un événement envoyé par le timer_manager.
         if let Ok(value_received) = rx_timer.try_recv() {
             match value_received {
-                EventTimerTick::Pause => {
-                    println!("Pause timer received");
-                    end_game = true;
-                },
+                // Fin de partie envoyé
                 EventTimerTick::End => {
-                    println!("End timer received");
                     end_game = true;
                 }
-                ErrRec => {}
+                _ => {}
             }
         } 
     }
 
-    println!("Timer tick - End game");
+    Ok(())
 }
