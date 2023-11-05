@@ -2,11 +2,14 @@ mod grid;
 
 mod players;
 
-use crate::connect_4_error::{Connect4Error, Connect4Result};
+use crate::connect_4_error::Connect4Error;
 
 //::{Player, IdPlayer, self}; 
 use self::players::*;
 
+/*
+Structure qui reçoit la grille de jeu, les 2 joueurs, le joueur courant et le statut du jeu (fini ou non fini)
+*/
 pub struct GameData {
     pub grid: Vec<Vec<char>>,
     pub players: [Player; 2],
@@ -15,6 +18,11 @@ pub struct GameData {
 }
 
 impl GameData {
+
+    /**
+    Création d'une instance de la structure GameData qui initialise la grille, les noms des joueurs, le joueur courant
+    et l'état du jeu (initialisé à non fini)
+     */
     pub fn new() -> GameData {
         // On demande les noms des joueurs 
         let (player1_name, player2_name) = set_player_names();
@@ -31,18 +39,30 @@ impl GameData {
         }
     }
 
+    /**
+    Fonction qui retourne le nom du joueur courant
+     */
     pub fn get_current_player_name(&self) -> &str {
         &self.players[self.current_player].name
     }
 
+    /**
+    Fonction qui retourne le nom des joueurs
+     */
     pub fn get_player_names(&self, n_player: i8) -> String {
         if n_player == 1 { self.players[0].name.to_string() } else { self.players[1].name.to_string() }
     }
 
+    /**
+    Implémentation dans GameData de la fonction display chargée d'afficher la grille de jeu
+    */
     pub fn display(&self) {
         grid::display_grid(&self.grid);
     }
 
+    /**
+    Fonction ayant pour but de placer sur la grille de jeu le jeton du joueur courant
+    */
     pub fn make_move(&mut self, column: usize) -> Result<(), Connect4Error> {
        
         if column >= self.grid[0].len() {
@@ -54,7 +74,7 @@ impl GameData {
 
         if let Some(row) = row {
 
-            // Placez le jeton du joueur actuel dans la grille
+            // Place le jeton du joueur actuel dans la grille
             let current_player = &self.players[self.current_player];
             row[column] = current_player.symbol.chars().next().unwrap();
         
@@ -68,12 +88,19 @@ impl GameData {
         }
     }      
 
+    /**
+    Fonction qui détermine les différentes étapes du jeu 
+    1) On détermne le joueur courant
+    2) On affiche la grille de jeu
+    3) On attend que le joueur courant place son jeton sur la grille de jeu
+    4) On vérifie que le jeton peut-être placé sur la grille
+    */
     pub fn play_game(&mut self) -> Result<(), Connect4Error> {
         
         // Détermine le joueur courant
         let current_player = &self.players[self.current_player];
         
-        // Affiche la grille vide
+        // Affiche la grille de jeu
         self.display();
     
         println!("C'est à {} de jouer ({}).", current_player.name, current_player.symbol);
@@ -101,7 +128,10 @@ impl GameData {
         Ok(())
     }
 
-
+    /**
+    Fonction qui vérifie les conditions de victoire à chaque fois qu'un jeton est placé
+    Vérifie s'il y a 4 jetons alignés sur les lignes horizontales, verticales et diagonales
+    */
     //Fonction is_game_over rédigée par ChatGPT
     pub fn is_game_over(&self) -> bool {
         let symbol_chars: Vec<char> = self.players.iter().map(|player| player.symbol.chars().next().unwrap()).collect();
@@ -141,10 +171,17 @@ impl GameData {
         false
     }
 
+    /**
+    Fonction qui vérifie si la grille est pleine, s'il n'y a pas 4 jetons similaires qui sont alignés et que la grille est pleine
+    le match est déclaré comme nul
+    */
     pub fn is_game_draw(&self) -> bool {
         self.grid.iter().all(|row| row.iter().all(|&cell| cell != ' '))
     }    
 
+    /**
+    Fonction qui détermine si la partie de jeu est finie
+    */
     pub fn timeout(&mut self) {
         self.game_over = true;
     }

@@ -13,6 +13,10 @@ pub struct GameManager {
 }
 
 impl GameManager {
+
+    /**
+    Création d'une instance de la structure GameManager
+    */
     pub fn new(tx_timer: Sender<Event>, rx_timer: Receiver<Event>, tx_player_names: Sender<String>) -> GameManager {
 
         // Crée le game data qui contient toutes les informations du jeu
@@ -30,6 +34,10 @@ impl GameManager {
         }
     }
 
+    /**
+    Fonction qui, tant que la partie n'est pas finie, fait continuer le jeu,
+    si la partie est finie, elle indique l'issue (match nul ou victoire d'un des joueurs)
+    */
     pub fn run_game(&mut self) -> Result<(), Connect4Error> {
         // Vérifie s'il y a un match nul ou une victoire
         while !self.game_data.game_over {
@@ -49,7 +57,6 @@ impl GameManager {
 
             if self.game_data.is_game_draw() {
                 println!("Game draw - Endgame");
-                // TODO Envoi info endgame aux autres objets
                 self.end_game()?;
             }
 
@@ -69,16 +76,6 @@ impl GameManager {
         self.destroy();
         Ok(())
     }
-
-    /*
-    pub fn get_game_information(&self) -> (bool, (String, String)) {
-        if self.game_data.game_over {
-            return (false, ("".to_string(), "".to_string()));
-        } 
-        (true, self.game_data.get_player_names())
-    }
-    */
-
 }
 
 impl ConnectFourThreadObject for GameManager {
