@@ -33,22 +33,29 @@ impl Player {
 }
 
 /**
-Fonction qui demande au joueur de saisir son nom
+Fonction qui demande au joueur de saisir son nom (la saisie ne peut pas être vide)
 */
 pub fn input_player_name(player_number: u8) -> String {
-    println!("Entrez le nom du joueur {} :\n", player_number);
+    loop {
+        println!("Entrez le nom du joueur {} :\n", player_number);
 
-    let mut input = String::new();
-    io::stdin()
-        .read_line(&mut input)
-        .expect("La saisie contient une erreur, veuillez recommencer !");
+        let mut input = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .expect("La saisie contient une erreur, veuillez recommencer !");
 
-    let trimmed_name = input.trim();
-    trimmed_name.to_string()
+        let trimmed_name = input.trim();
+        if !trimmed_name.is_empty() {
+            return trimmed_name.to_string();
+        } else {
+            println!("Le nom ne peut pas être vide. Veuillez entrer un nom valide.");
+        }
+    }
 }
 
 /**
 Fonction qui va définir le nom des joueurs avec les entrées de la fonction input_player_names
+(la saisie ne peut être qu'un chiffre entre 1 et 7 et ne peut pas être vide)
 */
 pub fn set_player_names() -> (String, String) {
     let player1_name = input_player_name(1);
@@ -64,14 +71,20 @@ Fonction qui va demander à l'utilisateur de choisir la colonne de la grille de 
 dans laquelle il souhaite placer son jeton
 */
 pub fn get_column_choice() -> usize {
-    println!("Entrez le numéro de la colonne où vous souhaitez placer votre pièce : ");
+    loop {
+        println!("Entrez le numéro de la colonne où vous souhaitez placer votre pièce : ");
 
-    let mut input = String::new();
-    io::stdin()
-        .read_line(&mut input)
-        .expect("La saisie contient une erreur, veuillez recommencer");
+        let mut input = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .expect("La saisie contient une erreur, veuillez recommencer");
 
-    let column: usize = input.trim().parse().expect("La colonne n'est pas valide, veuillez en choisir une autre");
-
-    column - 1
+        match input.trim().parse::<usize>() {
+            Ok(column) if (1..=7).contains(&column) => return column - 1,
+            _ => {
+                println!("La réponse n'est pas valide. Veuillez entrer un chiffre entre 1 et 7.");
+                continue;
+            }
+        }
+    }
 }
