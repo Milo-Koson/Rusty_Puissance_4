@@ -2,7 +2,7 @@
 /**
 Minutes par défault des joueurs.
 */
-const START_TIME_MINUTES: f64 = 50.;
+const START_TIME_MINUTES: f64 = 3.;
 /**
 Secondes par défault des joueurs.
  */
