@@ -4,7 +4,7 @@ use crate::connect_4_error::Connect4Error;
 use crate::{Event, EventTimerTick};
 use crate::timer_manager::players_times::PlayersTimes;
 use crate::timer_manager::timer_graphics::TimerGraphics;
-use crate::timer_manager::timer_tick::{Tick};
+use crate::timer_manager::timer_tick::Tick;
 
 mod timer_graphics;
 mod players_times;
@@ -81,10 +81,10 @@ impl TimerManager {
                         self.end_game = true;
                         Ok::<(), Connect4Error>(())
                     },
-                    false => Ok({})
+                    false => Ok(())
                 }
             },
-            _ => Ok({})
+            _ => Ok(())
         }.ok();
 
         // Met à jour la fenêtre graphique

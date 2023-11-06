@@ -1,10 +1,12 @@
-
-use std::sync::mpsc::{Receiver, Sender}; //RecvError
+use std::sync::mpsc::{Receiver, Sender};
 
 use std::thread;
 use std::time::Duration;
 use crate::connect_4_error::Connect4Error;
 use crate::EventTimerTick;
+
+// Constante du temps d'attente pour le décompte du temps
+const DELAY_MILLISECOND: u64 = 1000;
 
 /**
 Enumération pour le tick du décomptage du temps.
@@ -35,9 +37,10 @@ pub fn run(rx_timer: Receiver<EventTimerTick>, tx_timer: Sender<Tick>) -> Result
     // Tant que la partie n'est pas finie, on continue de décompter.
     while !end_game {
 
-        // Wait for 1 sec
-        thread::sleep(Duration::from_millis(1000));
-        //println!("tick");
+        // Attente de décompte
+        thread::sleep(Duration::from_millis(DELAY_MILLISECOND));
+
+        // Envoi d'un tick au timer_manager
         let _ = tx_timer.send(Tick::Tick);
 
         // Vérification d'un événement envoyé par le timer_manager.
@@ -45,9 +48,11 @@ pub fn run(rx_timer: Receiver<EventTimerTick>, tx_timer: Sender<Tick>) -> Result
             match value_received {
                 // Fin de partie envoyé
                 EventTimerTick::End => {
+                    // Permet de quitter la boucle de décompte
                     end_game = true;
                 }
-                _ => {}
+                // Ne fait rien si un start est demandé en cours de décompte
+                EventTimerTick::Start => {},
             }
         } 
     }

@@ -134,29 +134,23 @@ async fn main() -> Connect4Result<()> {
     // timer_manager pour les afficher sur le timer. tx au timer_manager et rx au game_manager.
     let (tx_player_names, rx_player_names) = channel::<String>();
 
-    // Création du handle du thread du game manager (pour l'attendre à la fin du main).
-    let game_manager_thread;
     // Lancement du thread et récupération du handle si pas d'erreur.
-    match init_game_manager(tx_timer, rx_game_manager, tx_player_names) {
-        Ok(game_manager_thread_recv) => game_manager_thread = game_manager_thread_recv,
+    let game_manager_thread = match init_game_manager(tx_timer, rx_game_manager, tx_player_names) {
+        Ok(game_manager_thread_recv) => game_manager_thread_recv,
         Err(connect_4_error) => return Err(connect_4_error)
-    }
-
-    // Création des noms des joueurs pour les transmettre à timer_manager
-    let name_player_1;
-    let name_player_2;
+    };
 
     // Récupère le nom du joueur 1 donné par game_manager, par réception bloquante du canal.
-    match rx_player_names.recv() {
-        Ok(name_player_1_recv) => name_player_1 = name_player_1_recv,
+    let name_player_1 = match rx_player_names.recv() {
+        Ok(name_player_1_recv) => name_player_1_recv,
         Err(_) => return Err(Connect4Error::ChannelRecv)
-    }
+    };
 
     // Récupère le nom du joueur 2 donné par game_manager, par réception bloquante du canal.
-    match rx_player_names.recv() {
-        Ok(name_player_2_recv) => {name_player_2 = name_player_2_recv;},
+    let name_player_2 = match rx_player_names.recv() {
+        Ok(name_player_2_recv) => name_player_2_recv,
         Err(_) => return Err(Connect4Error::ChannelRecv)
-    }
+    };
 
     // Création de l'instance de timer_manager.
     let mut timer_manager = TimerManager::new(name_player_1, name_player_2, tx_game_manager);
@@ -169,9 +163,7 @@ async fn main() -> Connect4Result<()> {
 
         // Exécute le code principale de timer_manager (comprenant l'affichage de la fenêtre du
         // timer). Si une erreur survient, il s'agit de la fenêtre du timer.
-        match timer_manager.run().await? {
-            () => {}
-        }
+        timer_manager.run().await?;
 
         // Récupère un possible événement provenant du state_manager (non bloquante).
         let response_from_state_manager = rx_timer.try_recv();

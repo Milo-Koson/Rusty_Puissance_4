@@ -65,9 +65,12 @@ Le code est commenté au niveau des fonctions et fonctionnalités importantes ou
 
 ## Dépendances 
 
-* macroquad  
-Utilisé pour l'affichage de la fenêtre du timer.
+* macroquad : Utilisé pour l'affichage de la fenêtre du timer.
 
-* clearscreen  
-Utilisé pour rafraichir le terminal. 
+* clearscreen : Utilisé pour rafraichir le terminal. 
 
+## Notes de développement 
+
+Quelques problèmes subsistent :  
+* Un joueur qui pose une pièce dans la 4e ligne gagne, même s'il n'a pas aligné 4 de ses pièces.
+* Un joueur ne gagne pas dans toutes les situations en plaçant 4 pièces horizontalement.
