@@ -141,7 +141,7 @@ impl ConnectFourThreadObject for TimerManager {
     }
 
     /**
-    Arrête
+    S'assure de l'arrêt du timer_tick.
     */
     fn destroy(&self) {
         let _ = self.tx_tick.send(EventTimerTick::End);

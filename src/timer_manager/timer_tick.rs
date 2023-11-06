@@ -36,7 +36,7 @@ pub fn run(rx_timer: Receiver<EventTimerTick>, tx_timer: Sender<Tick>) -> Result
     while !end_game {
 
         // Wait for 1 sec
-        thread::sleep(Duration::from_millis(1000));
+        thread::sleep(Duration::from_millis(15));
         //println!("tick");
         let _ = tx_timer.send(Tick::Tick);
 
