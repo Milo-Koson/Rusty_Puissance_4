@@ -74,3 +74,4 @@ Le code est commenté au niveau des fonctions et fonctionnalités importantes ou
 Quelques problèmes subsistent :  
 * Un joueur qui pose une pièce dans la 4e ligne gagne, même s'il n'a pas aligné 4 de ses pièces.
 * Un joueur ne gagne pas dans toutes les situations en plaçant 4 pièces horizontalement.
+* Quand la fenêtre du timer est en attente (en début et fin de partie), elle peut s'arrêter par crash.
